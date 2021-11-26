@@ -9,6 +9,7 @@ Default Values:
 
 ```
 NODE_ENV=testing
+LOG_LEVEL=info
 CONFIG_FILE=config.yaml
 HTTP_HOST=0.0.0.0
 HTTP_PORT=3000

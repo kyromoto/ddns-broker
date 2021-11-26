@@ -1,19 +1,20 @@
 'use strict'
 
+const libFQDN = require('./../../../libs/fqdn')
 const Validator = require('validator')
 
 module.exports = (logger, configRepository, messageQueue) => async function (req, res) {
     try {
         const ipv4 = req.query.ip
         const ipv6 = req.query.ipv6
-        const hostname = req.query.hostname
+        const fqdn = req.query.hostname
 
         if(typeof ipv4 === 'undefined' && typeof ipv6 === 'undefined') {
             logger.warn({ message: `BAD request: ipv4 nor ipv6 are not defined. URL: ${req.originalUrl}`, cid: req.correlationId })
             return res.status(400).send('fatal')
         }
 
-        if(!hostname) {
+        if(!fqdn) {
             logger.warn({ message: `BAD request: hostname is not defined. URL: ${req.originalUrl}`, cid: req.correlationId })
             return res.status(400).send('fatal')
         }
@@ -32,8 +33,8 @@ module.exports = (logger, configRepository, messageQueue) => async function (req
             }
         }
 
-        if(!Validator.isFQDN(hostname)) {
-            logger.warn({ message: `BAD request: Hostname is not valid. HOSTNAME: ${hostname}`, cid: req.correlationId })
+        if(!Validator.isFQDN(fqdn)) {
+            logger.warn({ message: `BAD request: Hostname is not valid. HOSTNAME: ${fqdn}`, cid: req.correlationId })
             return res.status(400).send('fatal')
         }
 
@@ -42,21 +43,25 @@ module.exports = (logger, configRepository, messageQueue) => async function (req
             return res.status(400).send('fatal')
         }
 
-        const provider = await configRepository.getProviderByUsernameAndHostname(req.username, hostname)
+        const provider = await configRepository.getProviderByUsernameAndHostname(req.username, fqdn)
+
+        const ips = []
 
         if(typeof ipv4 !== 'undefined') {
-            const payload = { correlationId: req.correlationId, provider: provider, hostname: hostname, ip: ipv4 }
-            messageQueue.emit('message', { queue: provider.name, payload: payload })
-
-            logger.info({ message: `Job emitted for IPv4. URL: ${req.originalUrl}`, cid: req.correlationId })
+            ips.push(ipv4)
         }
 
         if(typeof ipv6 !== 'undefined') {
-            const payload = { correlationId: req.correlationId, provider: provider, hostname: hostname, ip: ipv6 }
+            ips.push(ipv6)
+        }
+
+        ips.forEach(ip => {
+            const ipType = libFQDN.getIpType(ip)
+            const payload = { correlationId: req.correlationId, provider: provider, fqdn: fqdn, ip: ip }
             messageQueue.emit('message', { queue: provider.name, payload: payload })
 
-            logger.info({ message: `Job emitted for IPv6. URL: ${req.originalUrl}`, cid: req.correlationId })
-        }
+            logger.info({ message: `Job emitted for record ${ipType} of ${fqdn}`, cid: req.correlationId, fqdn: fqdn, ipType: ipType })
+        })
 
         return res.status(200).send('good')
     } catch (err) {

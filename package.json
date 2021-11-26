@@ -4,16 +4,17 @@
   "description": "Dynamic DNS Broker",
   "main": "src/index.js",
   "dependencies": {
-    "basic-auth": "^2.0.1",
+    "basic-auth": "^2.0",
     "domrobot-client": "^3.0",
     "dotenv": "^10.0",
     "express": "^4.17",
     "fastq": "^1.13",
-    "helmet": "^4.6.0",
-    "js-yaml": "^4.1.0",
-    "uuid": "^8.3.2",
-    "validator": "^13.7.0",
-    "winston": "3.3.3"
+    "helmet": "^4.6",
+    "js-yaml": "^4.1",
+    "needle": "3.0",
+    "uuid": "^8.3",
+    "validator": "^13.7",
+    "winston": "3.3"
   },
   "devDependencies": {},
   "scripts": {

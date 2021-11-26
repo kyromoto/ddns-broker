@@ -2,6 +2,7 @@
 
 const { ApiClient, Language } = require('domrobot-client')
 const  Validator = require('validator')
+const libFQDN = require('./../../../libs/fqdn')
 
 const API_URL = process.env.NODE_ENV === 'production' ? ApiClient.API_URL_LIVE : ApiClient.API_URL_OTE
 
@@ -15,28 +16,6 @@ const login = async function (client, username, password) {
 
 const logout = async function (client) {
     await client.logout()
-}
-
-const getDomain = function (hostname) {
-    let splittedHostname = hostname.split('.');
-  
-    if (splittedHostname.length < 2) {
-        throw new Error(`Hostname could not be splitted. Hostname: ${hostname}`)
-    }
-  
-    return splittedHostname[splittedHostname.length - 2] + '.' + splittedHostname[splittedHostname.length - 1];
-}
-
-const getIpType = function (ip) {    
-    if(Validator.isIP(ip, 4)) {
-        return "A"
-    }
-    
-    if (Validator.isIP(ip, 6)) {
-        return "AAAA"
-    }
-
-    throw new Error(`Ip is not valid. ${ip}`)
 }
 
 const getErrorMessageFromApiResponse = function (response) {
@@ -54,57 +33,53 @@ class Provider {
             const correlationId = job.correlationId
             const username = job.provider.auth.username
             const password = job.provider.auth.password
-            const hostname = job.hostname
+            const fqdn = job.fqdn
+            const domain = libFQDN.getDomain(fqdn)
+            // const hostname = libFQDN.getHostname(fqdn)
             const ip = job.ip
+            const ipType = libFQDN.getIpType(ip)
 
             try {
-                if(!Validator.isFQDN(hostname)) {
-                    throw new Error(`Hostname is not valid. Hostname: ${hostname}`)
-                }
-        
-                const ipType = getIpType(ip)
-                const domain = getDomain(hostname)
-        
                 await login(this.client, username, password)
-                this.logger.debug(`INWX api login successfull for ${username}.`, correlationId)
+                this.logger.debug({ message: `INWX api login successfull for ${username}.`, fqdn: fqdn, ipType: ipType, cid: correlationId })
         
-                const nameserverInfoResponse = await this.client.callApi('nameserver.info', { domain: domain, name: hostname }, correlationId)
+                const nameserverInfoResponse = await this.client.callApi('nameserver.info', { domain: domain, name: fqdn }, correlationId)
         
                 if (nameserverInfoResponse.code !== 1000) {
                     throw new Error("INWX api nameserver.info request error. " + getErrorMessageFromApiResponse(nameserverInfoResponse));
                 }
         
                 if(!nameserverInfoResponse || !nameserverInfoResponse.resData.record) {
-                    throw new Error(`No records found for hostmane in domain. DOMAIN: ${domain} HOSTNAME: ${hostname}`)
+                    throw new Error(`No records found for hostmane in domain. DOMAIN: ${domain} FQDN: ${fqdn}`)
                 }
         
                 const records = nameserverInfoResponse.resData.record
         
                 if(records.length <= 0) {
-                    throw new Error(`INWX api no records found error for ${hostname}.`)
+                    throw new Error(`INWX api no records found error for ${ipType} of ${fqdn}.`)
                 }
         
                 const recordsfilteredByType = records.filter(record => record.type === ipType)
         
                 if(recordsfilteredByType.length <= 0) {
-                    throw new Error(`INWX api no ipv4 records found error for ${hostname}.`)
+                    throw new Error(`INWX api no ipv4 records found error for ${ipType} of ${fqdn}.`)
                 }
         
                 const domainUpdateResponse = await this.client.callApi('nameserver.updateRecord', { id: recordsfilteredByType[0].id, content: ip }, correlationId)
         
                 if(domainUpdateResponse.code !== 1000) {
-                    throw new Error(`INWX api nameserver.updateRecord error for ${hostname}. ${getErrorMessageFromApiResponse(domainUpdateResponse)}`)
+                    throw new Error(`INWX api nameserver.updateRecord error ffor ${ipType} of ${fqdn}. ${getErrorMessageFromApiResponse(domainUpdateResponse)}`)
                 }
         
-                this.logger.info({ message: `Dns records update successfull for ${hostname}. Code: ${domainUpdateResponse.code}  Message: ${domainUpdateResponse.msg}`, cid: correlationId })
+                this.logger.info({ message: `DNS record update successfull for ${ipType} of ${fqdn}. Code: ${domainUpdateResponse.code}  Message: ${domainUpdateResponse.msg}`, fqdn: fqdn, ipType: ipType, cid: correlationId })
         
                 await logout(this.client)
-                this.logger.debug({ message: `INWX api logout successfull.`, cid: correlationId })
+                this.logger.debug({ message: `INWX api logout successfull.`, fqdn: fqdn, ipType: ipType, cid: correlationId })
 
                 return callback(undefined, 'OK')
             } catch (err) {
-                // this.logger.error(err.message, correlationId)
-                return callback(new Error(`DNS Update failed. Error: ${err.message}`))
+                this.logger.error({ message: err.message, fqdn: fqdn, ipType: ipType, cid: correlationId })
+                return callback(new Error("ERROR"))
             }
         })
     }
