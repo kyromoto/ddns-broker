@@ -26,13 +26,11 @@ module.exports = (logger, configRepository, messageQueue) => async function (req
         }
 
         if(typeof ipv6 !== 'undefined') {
-            console.log('check')
             if(!Validator.isIP(ipv6)) {
                 logger.warn({ message: `BAD request: IPv6 is not valiid. IP: ${ipv6}`, cid: req.correlationId })
                 return res.status(400).send('fatal')
             }
         }
-
 
         if(!Validator.isFQDN(hostname)) {
             logger.warn({ message: `BAD request: Hostname is not valid. HOSTNAME: ${hostname}`, cid: req.correlationId })
