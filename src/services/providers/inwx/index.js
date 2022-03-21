@@ -1,7 +1,6 @@
 'use strict'
 
 const { ApiClient, Language } = require('domrobot-client')
-const { init } = require('express/lib/application')
 const  Validator = require('validator')
 const libFQDN = require('./../../../libs/fqdn')
 
@@ -26,7 +25,7 @@ const getErrorMessageFromApiResponse = function (response) {
 class Provider {
     constructor(loggerFactory, messageQueue) {     
         this.client = new ApiClient(API_URL, Language.DE, process.env.NODE_ENV !== 'production')
-        this.logger = loggerFactory.createServiceLogger('GoDaddy Provider')
+        this.logger = loggerFactory.createServiceLogger('INWX Provider')
         this.messageQueue = messageQueue
 
         this.logger.info(`use ${API_URL}`)
