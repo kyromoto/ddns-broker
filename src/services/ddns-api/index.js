@@ -2,6 +2,7 @@
 const http = require('http')
 const express = require('express')
 const helmet = require('helmet')
+const morgan = require('morgan')
 const userAuthMiddleware = require('./middlwares/user-auth-middleware')
 const correlationIdMiddleware = require('./middlwares/correlation-id-middleware')
 const routeNotFoundMiddleware = require('./middlwares/route-not-found-middleware')
@@ -21,6 +22,7 @@ class DDNS_API {
         this.server = http.createServer(this.app)
 
         this.app.use(helmet())
+        this.app.use(morgan('combined'))
         this.app.get('/update', correlationIdMiddleware(this.logger), userAuthMiddleware(this.logger, this.configRepository), updateHandler(this.logger, this.configRepository, this.messageQueue))
         this.app.get('/status', statusHandler())
         this.app.use(routeNotFoundMiddleware(this.logger))

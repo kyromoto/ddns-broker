@@ -4,7 +4,7 @@
   "description": "Dynamic DNS Broker",
   "main": "src/index.js",
   "dependencies": {
-    "awilix": "7.0.0",
+    "awilix": "^7.0",
     "basic-auth": "^2.0",
     "domrobot-client": "^3.0",
     "dotenv": "^10.0",
@@ -12,6 +12,7 @@
     "fastq": "^1.13",
     "helmet": "^4.6",
     "js-yaml": "^4.1",
+    "morgan": "^1.10",
     "needle": "3.0",
     "uuid": "^8.3",
     "validator": "^13.7",
