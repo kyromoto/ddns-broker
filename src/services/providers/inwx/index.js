@@ -23,9 +23,9 @@ const getErrorMessageFromApiResponse = function (response) {
 }
 
 class Provider {
-    constructor(logger, messageQueue) {     
+    constructor(loggerFactory, messageQueue) {     
         this.client = new ApiClient(API_URL, Language.DE, process.env.NODE_ENV !== 'production')
-        this.logger = logger
+        this.logger = loggerFactory.createServiceLogger('GoDaddy Provider')
 
         this.logger.info(`use ${API_URL}`)
 

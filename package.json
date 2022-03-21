@@ -4,6 +4,7 @@
   "description": "Dynamic DNS Broker",
   "main": "src/index.js",
   "dependencies": {
+    "awilix": "7.0.0",
     "basic-auth": "^2.0",
     "domrobot-client": "^3.0",
     "dotenv": "^10.0",

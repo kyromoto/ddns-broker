@@ -4,8 +4,8 @@ const libFQDN = require('./../../../libs/fqdn')
 const API_FQDN = process.env.NODE_ENV === 'production' ? 'api.godaddy.com' : 'api.ote-godaddy.com'
 
 class Provider {
-    constructor(logger, messageQueue) {
-        this.logger = logger
+    constructor(loggerFactory, messageQueue) {
+        this.logger = loggerFactory.createServiceLogger('GoDaddy Provider')
 
         this.logger.info(`use ${API_FQDN}`)
 

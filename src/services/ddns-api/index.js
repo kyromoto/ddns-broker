@@ -2,7 +2,6 @@
 const http = require('http')
 const express = require('express')
 const helmet = require('helmet')
-const logger = require('../../logger')
 const userAuthMiddleware = require('./middlwares/user-auth-middleware')
 const correlationIdMiddleware = require('./middlwares/correlation-id-middleware')
 const routeNotFoundMiddleware = require('./middlwares/route-not-found-middleware')
@@ -12,8 +11,8 @@ const HTTP_HOST = process.env.HTTP_HOST || '0.0.0.0'
 const HTTP_PORT = process.env.HTTP_PORT || 3000
 
 class DDNS_API {
-    constructor(logger, configRepository, messageQueue) {
-        this.logger = logger
+    constructor(loggerFactory, configRepository, messageQueue) {
+        this.logger = loggerFactory.createServiceLogger('DDNS API')
         this.configRepository = configRepository
         this.messageQueue = messageQueue
         

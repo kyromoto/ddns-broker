@@ -2,17 +2,30 @@
 
 require('dotenv').config()
 
-const Logger = require('./logger')
-const ConfigRepository = require('./services/config-repository')
+const awilix = require('awilix')
+
+// shared
+const LoggerFactory = require('./shared/logger')
+const ConfigRepository = require('./shared/config-repository')
+const MessageQueue = require('./shared/message-queue')
+
+// services
 const DDNS_API = require('./services/ddns-api')
-const MessageQueue = require('./services/message-queue')
 const InwxProvider = require('./services/providers/inwx')
 const GoDaddyProvider = require('./services/providers/godaddy')
 
-const configRepository = new ConfigRepository(Logger.getServiceLogger('Config Repository'))
-const messageQueue = new MessageQueue(Logger.getServiceLogger('Message Queue'))
-const api = new DDNS_API(Logger.getServiceLogger('DDNS API'), configRepository, messageQueue)
-const inwx = new InwxProvider(Logger.getServiceLogger('INWX Provider'), messageQueue)
-const godaddy = new GoDaddyProvider(Logger.getServiceLogger('GoDaddy Provider'), messageQueue)
 
-api.start()
+const container = awilix.createContainer({
+    injectionMode: awilix.InjectionMode.CLASSIC
+})
+
+container.register({
+    loggerFactory: awilix.asClass(LoggerFactory),
+    messageQueue: awilix.asClass(MessageQueue),
+    configRepository: awilix.asClass(ConfigRepository),
+    api: awilix.asClass(DDNS_API),
+    inwx: awilix.asClass(InwxProvider),
+    godaddy: awilix.asClass(GoDaddyProvider)
+})
+
+container.resolve('api').start()

@@ -25,8 +25,8 @@ const getProviderByHostname = function (account, hostname) {
 }
 
 class ConfigRepository {
-    constructor(logger) {
-        this.logger = logger
+    constructor(loggerFactory) {
+        this.logger = loggerFactory.createServiceLogger('Config Repository')
     }
     
     async getProviderByUsernameAndHostname(username, hostname) {

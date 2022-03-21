@@ -3,9 +3,9 @@ const EventEmitter = require('events')
 const queue = require('fastq')
 
 class MessageQueue extends EventEmitter {
-    constructor(logger) {
+    constructor(loggerFactory) {
         super()
-        this.logger = logger
+        this.logger = loggerFactory.createServiceLogger('Message Queue')
         this.queues = new Map()
 
         this.on('message', message => {
