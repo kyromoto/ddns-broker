@@ -1,6 +1,7 @@
 'use strict'
 
 const { ApiClient, Language } = require('domrobot-client')
+const { init } = require('express/lib/application')
 const  Validator = require('validator')
 const libFQDN = require('./../../../libs/fqdn')
 
@@ -29,7 +30,9 @@ class Provider {
         this.messageQueue = messageQueue
 
         this.logger.info(`use ${API_URL}`)
+    }
 
+    init() {
         this.messageQueue.registerQueue('inwx', 1, async (job, callback) => {
             const correlationId = job.correlationId
             const username = job.provider.auth.username

@@ -1,3 +1,4 @@
+const { init } = require('express/lib/application')
 const needle = require('needle')
 const libFQDN = require('./../../../libs/fqdn')
 
@@ -9,7 +10,9 @@ class Provider {
         this.messageQueue = messageQueue
 
         this.logger.info(`use ${API_FQDN}`)
+    }
 
+    init() {
         this.messageQueue.registerQueue('godaddy', 1, async (job, callback) => {
             const correlationId = job.correlationId
             const key = job.provider.auth.key
