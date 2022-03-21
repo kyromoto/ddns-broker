@@ -26,10 +26,11 @@ class Provider {
     constructor(loggerFactory, messageQueue) {     
         this.client = new ApiClient(API_URL, Language.DE, process.env.NODE_ENV !== 'production')
         this.logger = loggerFactory.createServiceLogger('GoDaddy Provider')
+        this.messageQueue = messageQueue
 
         this.logger.info(`use ${API_URL}`)
 
-        messageQueue.registerQueue('inwx', 1, async (job, callback) => {
+        this.messageQueue.registerQueue('inwx', 1, async (job, callback) => {
             const correlationId = job.correlationId
             const username = job.provider.auth.username
             const password = job.provider.auth.password

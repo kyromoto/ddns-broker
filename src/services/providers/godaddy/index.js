@@ -6,10 +6,11 @@ const API_FQDN = process.env.NODE_ENV === 'production' ? 'api.godaddy.com' : 'ap
 class Provider {
     constructor(loggerFactory, messageQueue) {
         this.logger = loggerFactory.createServiceLogger('GoDaddy Provider')
+        this.messageQueue = messageQueue
 
         this.logger.info(`use ${API_FQDN}`)
 
-        messageQueue.registerQueue('godaddy', 1, async (job, callback) => {
+        this.messageQueue.registerQueue('godaddy', 1, async (job, callback) => {
             const correlationId = job.correlationId
             const key = job.provider.auth.key
             const secret = job.provider.auth.secret

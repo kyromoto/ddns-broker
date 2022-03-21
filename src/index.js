@@ -28,4 +28,6 @@ container.register({
     godaddy: awilix.asClass(GoDaddyProvider)
 })
 
+container.resolve('inwx')
+container.resolve('godaddy')
 container.resolve('api').start()
