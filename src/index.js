@@ -20,12 +20,12 @@ const container = awilix.createContainer({
 })
 
 container.register({
-    loggerFactory: awilix.asClass(LoggerFactory),
-    messageQueue: awilix.asClass(MessageQueue),
-    configRepository: awilix.asClass(ConfigRepository),
-    api: awilix.asClass(DDNS_API),
-    inwx: awilix.asClass(InwxProvider),
-    godaddy: awilix.asClass(GoDaddyProvider)
+    loggerFactory: awilix.asClass(LoggerFactory).setLifetime(awilix.Lifetime.SINGLETON),
+    messageQueue: awilix.asClass(MessageQueue).setLifetime(awilix.Lifetime.SINGLETON),
+    configRepository: awilix.asClass(ConfigRepository).setLifetime(awilix.Lifetime.SINGLETON),
+    api: awilix.asClass(DDNS_API).setLifetime(awilix.Lifetime.SINGLETON),
+    inwx: awilix.asClass(InwxProvider).setLifetime(awilix.Lifetime.SINGLETON),
+    godaddy: awilix.asClass(GoDaddyProvider).setLifetime(awilix.Lifetime.SINGLETON)
 })
 
 container.resolve('inwx').init()
