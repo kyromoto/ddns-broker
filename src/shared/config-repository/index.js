@@ -24,6 +24,10 @@ const getProviderByHostname = function (account, hostname) {
     return (account.hostnames.find(accountHostname => accountHostname.name === hostname)).provider
 }
 
+const getActionsByHostname = function(account, hostname) {
+    return (account.hostnames.find(accountHostname => accountHostname.name === hostname)).actions
+}
+
 class ConfigRepository {
     constructor(loggerFactory) {
         this.logger = loggerFactory.createServiceLogger('Config Repository')
@@ -34,10 +38,20 @@ class ConfigRepository {
             const config = await loadConfigFromFile(filename)
             const account = findAccountByUsername(config, username)
             const provider = getProviderByHostname(account, hostname)
-
             return provider
         } catch(err) {
             this.logger.error('Error while getting hostname provider: ', err.message)
+        }
+    }
+
+    async getActionsByUsernameAndHostname(username, hostname) {
+        try {
+            const config = await loadConfigFromFile(filename)
+            const account = findAccountByUsername(config, username)
+            const actions = getActionsByHostname(account, hostname)
+            return actions
+        } catch(err) {
+            this.logger.error('Error while getting hostname actions: ', err.message)
         }
     }
 

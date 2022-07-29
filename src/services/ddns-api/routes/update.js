@@ -43,7 +43,10 @@ module.exports = (logger, configRepository, messageQueue) => async function (req
             return res.status(400).send('fatal')
         }
 
-        const provider = await configRepository.getProviderByUsernameAndHostname(req.username, fqdn)
+        // const provider = await configRepository.getProviderByUsernameAndHostname(req.username, fqdn)
+        const actions = await configRepository.getActionsByUsernameAndHostname(req.username, fqdn)
+
+        console.log(JSON.stringify(actions))
 
         const ips = []
 
@@ -55,13 +58,20 @@ module.exports = (logger, configRepository, messageQueue) => async function (req
             ips.push(ipv6)
         }
 
-        ips.forEach(ip => {
-            const ipType = libFQDN.getIpType(ip)
-            const payload = { correlationId: req.correlationId, provider: provider, fqdn: fqdn, ip: ip }
-            messageQueue.emit('message', { queue: provider.name, payload: payload })
+        actions.forEach(action => {
+            const payload = { correlationId: req.correlationId, action: action, fqdn: fqdn, ips: ips }
+            messageQueue.emit('message', { queue: action.provider, payload: payload })
 
-            logger.info({ message: `Job emitted for record ${ipType} of ${fqdn}`, cid: req.correlationId, fqdn: fqdn, ipType: ipType })
+            logger.info({ message: `Job emitted for action provider ${action.provider} of ${fqdn}`, cid: req.correlationId, fqdn: fqdn })
         })
+
+        // ips.forEach(ip => {
+        //     const ipType = libFQDN.getIpType(ip)
+        //     const payload = { correlationId: req.correlationId, provider: provider, fqdn: fqdn, ip: ip }
+        //     messageQueue.emit('message', { queue: provider.name, payload: payload })
+
+        //     logger.info({ message: `Job emitted for record ${ipType} of ${fqdn}`, cid: req.correlationId, fqdn: fqdn, ipType: ipType })
+        // })
 
         return res.status(200).send('good')
     } catch (err) {

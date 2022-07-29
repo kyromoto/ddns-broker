@@ -14,6 +14,21 @@ class Provider {
 
     init() {
         this.messageQueue.registerQueue('godaddy', 1, async (job, callback) => {
+            const { correlationId, fqdn, ips, action} = job
+
+            ips.forEach(ip => {
+                const ipType = libFQDN.getIpType(ip)
+                const provider = { name: action.provider, auth: action.auth }
+                const payload = { correlationId: correlationId, provider: provider, fqdn: fqdn, ip: ip }
+                this.messageQueue.emit('message', { queue: "godaddy_exec", payload: payload })
+
+                this.logger.info({ message: `Job emitted for record ${ipType} of ${fqdn}`, cid: req.correlationId, fqdn: fqdn, ipType: ipType })
+            })
+
+            return callback(undefined, 'OK')
+        })
+        
+        this.messageQueue.registerQueue('godaddy_exec', 1, async (job, callback) => {
             const correlationId = job.correlationId
             const key = job.provider.auth.key
             const secret = job.provider.auth.secret

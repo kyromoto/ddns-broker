@@ -17,10 +17,10 @@ class MessageQueue extends EventEmitter {
             
             queue.push(message.payload, (err, result) => {
                 if(err) {
-                    return logger.error({ message: 'Job failed: ' + err.message, cid: message.payload.correlationId })
+                    return this.logger.error({ message: 'Job failed: ' + err.message, cid: message.payload.correlationId })
                 }
 
-                logger.info({ message: 'Job result: ' + result, cid: message.payload.correlationId })
+                this.logger.info({ message: 'Job result: ' + result, cid: message.payload.correlationId })
             })
         })
     }
@@ -32,6 +32,10 @@ class MessageQueue extends EventEmitter {
 
         this.queues.set(name, queue(worker, concurrent))
         this.logger.debug(`Queue ${name} registered.`)
+    }
+
+    getRegisteredQueueNames() {
+        return [...this.queues.keys()]
     }
 }
 

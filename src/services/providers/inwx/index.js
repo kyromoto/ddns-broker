@@ -33,6 +33,21 @@ class Provider {
 
     init() {
         this.messageQueue.registerQueue('inwx', 1, async (job, callback) => {
+            const { correlationId, fqdn, ips, action} = job
+
+            ips.forEach(ip => {
+                const ipType = libFQDN.getIpType(ip)
+                const provider = { name: action.provider, auth: action.auth }
+                const payload = { correlationId: correlationId, provider: provider, fqdn: fqdn, ip: ip }
+                this.messageQueue.emit('message', { queue: 'inwx_exec', payload: payload })
+
+                this.logger.info({ message: `Job emitted for record ${ipType} of ${fqdn}`, cid: correlationId, fqdn: fqdn, ipType: ipType })
+            })
+
+            return callback(undefined, 'OK')
+        })
+
+        this.messageQueue.registerQueue('inwx_exec', 1, async (job, callback) => {
             const correlationId = job.correlationId
             const username = job.provider.auth.username
             const password = job.provider.auth.password

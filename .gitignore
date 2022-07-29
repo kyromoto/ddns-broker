@@ -106,3 +106,5 @@ dist
 # Aüülication Configuration File
 config.yml
 config.yaml
+config.*.yml
+config.*.yaml
