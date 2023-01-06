@@ -19,19 +19,19 @@ module.exports = (logger, configRepository, messageQueue) => async function (req
             return res.status(400).send('fatal')
         }
 
-        if(typeof ipv4 !== 'undefined') {
-            if(!Validator.isIP(ipv4)) {
-                logger.warn({ message: `BAD request: IPv4 is not valiid. IP: ${ipv4}`, cid: req.correlationId })
-                return res.status(400).send('fatal')
-            }
-        }
+        // if(typeof ipv4 !== 'undefined') {
+        //     if(!Validator.isIP(ipv4)) {
+        //         logger.warn({ message: `BAD request: IPv4 is not valiid. IP: ${ipv4}`, cid: req.correlationId })
+        //         return res.status(400).send('fatal')
+        //     }
+        // }
 
-        if(typeof ipv6 !== 'undefined') {
-            if(!Validator.isIP(ipv6)) {
-                logger.warn({ message: `BAD request: IPv6 is not valiid. IP: ${ipv6}`, cid: req.correlationId })
-                return res.status(400).send('fatal')
-            }
-        }
+        // if(typeof ipv6 !== 'undefined') {
+        //     if(!Validator.isIP(ipv6)) {
+        //         logger.warn({ message: `BAD request: IPv6 is not valiid. IP: ${ipv6}`, cid: req.correlationId })
+        //         return res.status(400).send('fatal')
+        //     }
+        // }
 
         if(!Validator.isFQDN(fqdn)) {
             logger.warn({ message: `BAD request: Hostname is not valid. HOSTNAME: ${fqdn}`, cid: req.correlationId })
@@ -50,12 +50,21 @@ module.exports = (logger, configRepository, messageQueue) => async function (req
 
         const ips = []
 
-        if(typeof ipv4 !== 'undefined') {
+        if(typeof ipv4 !== 'undefined' && Validator.isIP(ipv4)) {
             ips.push(ipv4)
+        } else {
+            logger.warn({ message: `IPv4 not defined or not valid: ${ipv4}`, cid: req.correlationId })
         }
 
-        if(typeof ipv6 !== 'undefined') {
+        if(typeof ipv6 !== 'undefined' && Validator.isIP(ipv6)) {
             ips.push(ipv6)
+        } else {
+            logger.warn({ message: `IPv6 not defined or not valid: ${ipv6}`, cid: req.correlationId })
+        }
+
+        if (ips.length == 0) {
+            logger.warn({ message: `BAD request: ipv4 nor ipv6 are not defined or not valid. URL: ${req.originalUrl}`, cid: req.correlationId })
+            return res.status(400).send('fatal')
         }
 
         actions.forEach(action => {
