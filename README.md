@@ -1,4 +1,4 @@
-# ddns-fw-3
+# ddns-broker
 Dynamic DNS Broker Application
 
 ## Environment
