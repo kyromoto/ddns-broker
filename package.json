@@ -4,32 +4,39 @@
   "description": "Dynamic DNS Broker",
   "main": "src/index.js",
   "dependencies": {
-    "awilix": "^7.0",
-    "axios": "0.27.2",
-    "basic-auth": "^2.0",
-    "domrobot-client": "^3.0",
-    "dotenv": "^10.0",
-    "express": "^4.17",
-    "fastq": "^1.13",
-    "helmet": "^4.6",
-    "ip-cidr": "3.0.10",
-    "js-yaml": "^4.1",
-    "morgan": "^1.10",
+    "awilix": "7.0",
+    "axios": "0.27",
+    "basic-auth": "2.0",
+    "domrobot-client": "3.0",
+    "dotenv": "10.0",
+    "express": "4.17",
+    "fastq": "1.13",
+    "helmet": "4.6",
+    "ip-cidr": "3.0",
+    "js-yaml": "4.1",
+    "morgan": "1.10",
     "needle": "3.0",
-    "uuid": "^8.3",
-    "validator": "^13.7",
-    "winston": "^3.3"
+    "uuid": "8.3",
+    "validator": "13.7",
+    "winston": "3.3"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "esbuild": "0.23"
+  },
   "scripts": {
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "build": "node build.mjs"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kyromoto/ddns-fw-3.git"
   },
-  "author": "Oliver Rademaker",
-  "license": "ISC",
+  "author": {
+    "name": "kyromoto",
+    "url": "https://github.com/kyromoto",
+    "email": "info@kyromoto.de"
+  },
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/kyromoto/ddns-fw-3/issues"
   },
