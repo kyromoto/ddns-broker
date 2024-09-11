@@ -1,6 +1,6 @@
 import { EntityManager } from "typeorm"
 
-import { DdnsGatewayEvent } from "@packages/events/ddns-gateway"
+import { DdnsGatewayEvent } from "@packages/events/ddns-gateway.events"
 import { AppError } from "../../_errors/AppError"
 import { Event } from "../models/Event"
 

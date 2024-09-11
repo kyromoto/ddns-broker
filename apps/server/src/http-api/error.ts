@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express"
 import { Logger } from "pino"
 
-import { AppError } from "@server/domains/_shared/errors/AppError"
+import { AppError } from "@server/domains/_errors/AppError"
 
 
 

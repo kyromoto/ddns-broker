@@ -4,8 +4,8 @@ import { Repository } from "typeorm"
 import { z } from "zod"
 import { Logger } from "pino"
 
-import { ClientIpUpdatedEvent } from "@packages/events/ddns-gateway/client-ip-updated-event"
-import { DdnsGatewayEvent } from "@packages/events/ddns-gateway"
+import { ClientIpUpdatedEvent } from "@packages/events/ddns-gateway.events"
+import { DdnsGatewayEvent } from "@packages/events/ddns-gateway.events"
 import { Client } from "@server/domains/ddns-gateway/models/Client"
 import { Event } from "@server/domains/ddns-gateway/models/Event"
 import { AppError } from "../../_errors/AppError"
@@ -100,7 +100,7 @@ export function makeUpdateClientIpExecutor(
                 }
 
                 await persistDomainEvent(tm, event)
-                await eventBusService.publish(event)
+                await eventBusService.publish(event, cid)
     
                 logger.info(event)
 
