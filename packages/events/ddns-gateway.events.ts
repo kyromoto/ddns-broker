@@ -36,3 +36,10 @@ export const DdnsGatewayEvent = z.discriminatedUnion("name", [
     ClientAddedEvent,
     ClientIpUpdatedEvent
 ])
+
+
+export type DdnsGatewayEventMap = {
+    "user-added"        : (ev: UserAddedEvent,       cid: string) => boolean
+    "client-added"      : (ev: ClientAddedEvent,     cid: string) => boolean
+    "client-ip-updated" : (ev: ClientIpUpdatedEvent, cid: string) => boolean
+}

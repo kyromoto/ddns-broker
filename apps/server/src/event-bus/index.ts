@@ -2,13 +2,15 @@ import { EventEmitter } from "node:events"
 
 import { Logger } from "pino"
 
-import { DdnsGatewayEvent } from "@packages/events/ddns-gateway";
-import { EventBusService } from "@server/domains/ddns-gateway/interfaces";
+import { DdnsGatewayEvent, DdnsGatewayEventMap } from "@packages/events/ddns-gateway.events"
+import { IpUpdateProcessorEvent, IpUpdateProcessorEventMap } from "@packages/events/ip-update-processor.events";
+import { EventBusService as DdnsGwEBS } from "@server/domains/ddns-gateway/service-interfaces"
+import { EventBusService as IpUpdateProcessorEBS } from "@server/domains/ip-update-processor/service-interfaces";
 
 
 
 
-class EventBusServiceImpl implements EventBusService {
+class EventBusServiceImpl implements DdnsGwEBS, IpUpdateProcessorEBS {
     
     private _logger: Logger
     private _eventEmitter = new EventEmitter()
@@ -17,14 +19,27 @@ class EventBusServiceImpl implements EventBusService {
         this._logger = logger
     }
 
-    async publish(event: DdnsGatewayEvent): Promise<void> {
+
+    publish(event: DdnsGatewayEvent | IpUpdateProcessorEvent, cid: string): Promise<boolean>
+    publish(events: DdnsGatewayEvent[] | IpUpdateProcessorEvent[], cid: string): Promise<boolean>
+
+    async publish(e: DdnsGatewayEvent | IpUpdateProcessorEvent | DdnsGatewayEvent[] | IpUpdateProcessorEvent[], cid: string): Promise<boolean> {
         
-        if (!this._eventEmitter.eventNames().includes(event.name)) {
-            this._logger.warn({ event }, "no subscribers for event")
+        let res = false
+        const events = []
+
+        Array.isArray(e) ? events.push(...e) : events.push(e)
+
+        for (const event of events) {
+            res = res && this._eventEmitter.emit(event.name, { cid, event })
         }
+        
+        return res
+        
+    }
 
-        this._eventEmitter.emit(event.name, event)
-
+    async subscribe<E extends (DdnsGatewayEvent | IpUpdateProcessorEvent)>(event: E["name"], handler: (event: E) => Promise<void>): Promise<void> {
+        this._eventEmitter.addListener(event, handler)
     }
 
 }

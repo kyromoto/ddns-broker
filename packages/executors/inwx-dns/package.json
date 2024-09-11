@@ -1,0 +1,10 @@
+{
+  "name": "ddns-broker-exec_inwx-dns",
+  "version": "1.0.0",
+  "devDependencies": {},
+  "author": {
+    "name": "Oliver Rademaker",
+    "email": "info@oliverrademaker.de"
+  },
+  "license": "ISC"
+}

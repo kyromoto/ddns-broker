@@ -1,5 +1,7 @@
 import 'dotenv/config'
 
+import { EventEmitter } from 'node:events'
+
 import pino from 'pino'
 import pinoPretty from 'pino-pretty'
 import { Router } from "express"
@@ -15,7 +17,7 @@ import * as env from './env'
 import * as Logger from "./logger"
 import { makeAddClientCmdController, makeAddUserCmdController } from './http-api/controllers/command-http-controllers'
 import { makeApiServer } from './http-api'
-import EventBusService from './event-bus'
+import { makeEventBusService } from './event-bus'
 import { makePingQueryController } from './http-api/controllers/query-http-controllers'
 import { makeUpdateClientIpCmdController } from './http-api/controllers/ddns-http-controllers'
 import { makeAuthenticateClientMiddleware } from './http-api/middlewares/authenticate-client-mw'
@@ -23,6 +25,11 @@ import { makeAddUserCommand } from './domains/ddns-gateway/usecases/add-user'
 import { makeAddClientCommand } from './domains/ddns-gateway/usecases/add-client'
 import { makeUpdateClientIpExecutor } from './domains/ddns-gateway/usecases/update-client-ip'
 import { makeIsClientAuthenticatedQuery } from './domains/ddns-gateway/usecases/is-client-authenticated'
+import { makeCreateProcessJobUpdateUC } from './domains/ip-update-processor/usecases/create-processor-job'
+import { makeProcessProcessorJobUC } from './domains/ip-update-processor/usecases/process-processor-job'
+import { AppError } from './domains/_errors/AppError'
+import { makeProcessorRegistry } from './processor-registry'
+
 
 
 
@@ -36,14 +43,40 @@ import { makeIsClientAuthenticatedQuery } from './domains/ddns-gateway/usecases/
     const userRepository        = AppDataSource.getRepository(User)
     const clientRepository      = AppDataSource.getRepository(Client)
     const passwordRepository    = AppDataSource.getRepository(Password)
-    const eventRepository       = AppDataSource.getRepository(Event)
 
-    const eventBusService = EventBusService.instance
 
+    const eventBusService = makeEventBusService(logger)
+    const processorRegistry = makeProcessorRegistry()
+
+    // usecases
     const addUserUC                 = makeAddUserCommand(logger, userRepository, passwordRepository, eventBusService)
     const addClientUC               = makeAddClientCommand(logger, clientRepository, passwordRepository, eventBusService)
     const updateClientIpUC          = makeUpdateClientIpExecutor(logger, clientRepository, eventBusService)
     const isClientAuthenticatedUC   = makeIsClientAuthenticatedQuery(logger, clientRepository)
+
+    const createProcessorJobUC     = makeCreateProcessJobUpdateUC(AppDataSource.manager, eventBusService, logger)
+    const processProcessorJobUC    = makeProcessProcessorJobUC(AppDataSource.manager, processorRegistry, logger)
+
+
+    eventBusService.subscribe("client-ip-updated", async event => {
+
+        if (Array.isArray(event) || event.name !== "client-ip-updated") {
+            throw new AppError(500, `event payload do not match subscribed event name client-ip-updated`)
+        }
+
+        await createProcessorJobUC(event.data.clientId, event.data.ips, event.cid)
+    })
+
+
+    eventBusService.subscribe("job-pending", async event => {
+        
+        if (event.name !== "job-pending") {
+            throw new AppError(500, `event payload do not match subscribed event name job-pending`)
+        }
+        
+        await processProcessorJobUC(event.data.jobId, event.cid)
+    })
+
 
     const apiRouter                 = Router()
     const ddnsGwCommandRouter       = Router()

@@ -1,8 +1,9 @@
 import { EntityManager } from "typeorm"
 
-import { IpUpdateProcessorEvent } from "@packages/events/ip-update-processor"
+
 import { AppError } from "../../_errors/AppError"
 import { Event } from "../models/Event"
+import { IpUpdateProcessorEvent } from "@packages/events/ip-update-processor.events"
 
 
 export async function persistDomainEvent(db: EntityManager, event: IpUpdateProcessorEvent) {
@@ -21,7 +22,8 @@ export async function persistDomainEvent(db: EntityManager, event: IpUpdateProce
         name: event.name,
         cid: event.cid,
         data: event.data,
-        sequence: lasteEvent ? lasteEvent.sequence + 1 : 1
+        sequence: lasteEvent ? lasteEvent.sequence + 1 : 1,
+        published: false
     })
 
 }

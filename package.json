@@ -12,7 +12,8 @@
   },
   "workspaces": [
     "packages/*",
-    "apps/*"
+    "apps/*",
+    "packages/executors/inwx-dns"
   ],
   "dependencies": {
     "zod": "^3.23"

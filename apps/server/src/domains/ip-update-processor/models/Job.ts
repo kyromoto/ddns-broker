@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne } from "typeorm"
 import { JobStatus } from "../types"
+import { Client } from "./Client"
 
 @Entity()
 export class Job {
@@ -10,13 +11,20 @@ export class Job {
 
 
     @Column({ type: "text" })
-    label: string
-
-    @Column({ type: "text" })
     status: JobStatus
 
-    @Column({ type: "text", transformer: { to: JSON.stringify, from: JSON.parse } })
-    data: Object
+    @Column("simple-json")
+    data: {
+        ips: string[],
+        processor: {
+            id: string,
+            name: string,
+            version: string
+        }
+    }
+
+    @ManyToOne(() => Client, client => client.jobs)
+    client: Client
 
 
     

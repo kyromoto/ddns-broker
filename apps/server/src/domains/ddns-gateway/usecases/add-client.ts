@@ -10,7 +10,7 @@ import { User } from "@server/domains/ddns-gateway/models/User"
 import * as Regex from "../regexes"
 import { generatePasswordHashAndSalt } from "../utils"
 import { persistDomainEvent } from "../helpers/event-persistence"
-import { EventBusService } from "../interfaces"
+import { EventBusService } from "../service-interfaces"
 import { AppError } from "../../_errors/AppError"
 
 

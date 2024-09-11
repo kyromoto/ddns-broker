@@ -9,7 +9,7 @@ import { DdnsGatewayEvent } from "@packages/events/ddns-gateway"
 import { Client } from "@server/domains/ddns-gateway/models/Client"
 import { Event } from "@server/domains/ddns-gateway/models/Event"
 import { AppError } from "../../_errors/AppError"
-import { EventBusService } from "../interfaces"
+import { EventBusService } from "../service-interfaces"
 import { persistDomainEvent } from "../helpers/event-persistence"
 
 

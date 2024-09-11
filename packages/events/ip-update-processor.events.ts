@@ -1,9 +1,9 @@
 import { z } from "zod"
 
 
-export type JobQueuedEvent = z.infer<typeof JobQueuedEvent>
-export const JobQueuedEvent = z.object({
-    name: z.literal("job-queued"),
+export type JobCreatedEvent = z.infer<typeof JobCreatedEvent>
+export const JobCreatedEvent = z.object({
+    name: z.literal("job-created"),
     cid: z.string().uuid(),
     data: z.object({
         jobId: z.string().uuid()
@@ -11,9 +11,19 @@ export const JobQueuedEvent = z.object({
 })
 
 
-export type JobStartedEvent = z.infer<typeof JobStartedEvent>
-export const JobStartedEvent = z.object({
-    name: z.literal("job-started"),
+export type JobPendingEvent = z.infer<typeof JobPendingEvent>
+export const JobPendingEvent = z.object({
+    name: z.literal("job-pending"),
+    cid: z.string().uuid(),
+    data: z.object({
+        jobId: z.string().uuid()
+    })
+})
+
+
+export type JobRunningEvent = z.infer<typeof JobRunningEvent>
+export const JobRunningEvent = z.object({
+    name: z.literal("job-running"),
     cid: z.string().uuid(),
     data: z.object({
         jobId: z.string().uuid()
@@ -44,8 +54,16 @@ export const JobCompletedEvent = z.object({
 
 export type IpUpdateProcessorEvent = z.infer<typeof IpUpdateProcessorEvent>
 export const IpUpdateProcessorEvent = z.discriminatedUnion("name", [
-    JobQueuedEvent,
-    JobStartedEvent,
+    JobPendingEvent,
+    JobRunningEvent,
     JobFailedEvent,
     JobCompletedEvent
 ])
+
+
+export type IpUpdateProcessorEventMap = {
+    "job-pending"   : (ev: JobPendingEvent, cid: string) => boolean
+    "job-running"   : (ev: JobRunningEvent, cid: string) => boolean
+    "job-failed"    : (ev: JobFailedEvent,  cid: string) => boolean
+    "job-completed" : (ev: JobCompletedEvent, cid: string) => boolean
+}

@@ -22,6 +22,9 @@ export class Event {
     @Column("simple-json")
     data: object
 
+    @Column({ type: "boolean" })
+    published: boolean
+
 
 
     @CreateDateColumn()
