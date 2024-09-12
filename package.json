@@ -6,7 +6,9 @@
   "author": "",
   "license": "ISC",
   "scripts": {
+    "dev:client": "node ./apps/client/dev.mjs",
     "dev:server": "node ./apps/server/dev.mjs",
+    "build:client": "node ./apps/client/build.mjs",
     "build:server": "node ./apps/server/build.mjs",
     "test:server": "jest --runInBand --config=apps/server/jest.config.js ./apps/server"
   },
