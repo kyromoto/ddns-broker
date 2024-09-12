@@ -1,0 +1,33 @@
+.layout {
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr;
+    grid-template-areas:
+        "clients jobs events";
+    
+    gap: 1rem;
+
+    & > * {
+
+        h1 {
+            text-align: center;
+            font-size: 1.25rem;
+        }
+    }
+
+
+    .clients {
+        grid-area: clients;
+    }
+
+    .jobs {
+        grid-area: jobs;
+    }
+
+    .events {
+        grid-area: events;
+    }
+
+}
