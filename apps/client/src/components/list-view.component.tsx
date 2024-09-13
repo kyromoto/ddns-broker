@@ -33,8 +33,7 @@ export default function ListViewComponent<T extends ListItem> (props: PropsWithC
                         className="btn btn-primary w-100"
                         onClick={props.onAddItem}
                     >
-                        <i className="bi bi-plus-lg" />
-                        Add
+                        <i className="bi bi-plus-lg" /> Add
                     </button>
                 }
 

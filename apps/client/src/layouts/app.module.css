@@ -13,7 +13,7 @@
         "header"
         "main";
 
-    gap: calc(var(--padding) * 3);
+    gap: calc(var(--padding) * 4);
 
 
 
