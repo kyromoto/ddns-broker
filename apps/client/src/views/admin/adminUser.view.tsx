@@ -1,6 +1,7 @@
 import React from "react"
 
 import ListViewComponent from "@client/components/list-view.component";
+import { useModal } from "@client/contexts/modal.context";
 
 type User = {
     id: string,
@@ -21,12 +22,37 @@ export default function AdminUserView () {
         { id: "3", username: "User-3", email: "User-3@localhost", firstname: "User-3", lastname: "User-3", roles: ["user"] },
     ]
 
+    const modal = useModal()
+
     const [users, setUsers] = React.useState<User[]>(mockList)
     const [selectedUser, setSelectedUser] = React.useState<User | undefined>(mockList[0])
     const [formUser, setFormUser] = React.useState<User | undefined>(selectedUser)
 
     function isFormUserEdited () {
         return JSON.stringify(selectedUser) !== JSON.stringify(formUser)
+    }
+
+
+    function onSave() {
+        modal.open({
+            title: "Save User",
+            body: "Are you sure you want to save this user?",
+            confirmLabel: "Save",
+            level: "warning",
+            onAction: () => console.info("save user confirmed")
+        })
+    }
+
+
+
+    function onDelete() {
+        modal.open({
+            title: "Delete User",
+            body: "Are you sure you want to delete this user?",
+            confirmLabel: "Delete",
+            level: "danger",
+            onAction: () => console.info("delete user confirmed")
+        })
     }
 
 
@@ -73,8 +99,8 @@ export default function AdminUserView () {
 
                 <div className="btn-toolbar justify-content-end gap-2" role="toolbar">
                     <button className="btn btn-primary" disabled={!isFormUserEdited()} onClick={() => setFormUser(selectedUser)} ><i className="bi bi-x-lg" /> Reset</button>
-                    <button className="btn btn-warning" disabled={!isFormUserEdited()} ><i className="bi bi-save" /> Update</button>
-                    <button className="btn btn-danger"><i className="bi bi-trash" /> Delete</button>
+                    <button className="btn btn-warning" disabled={!isFormUserEdited()} onClick={onSave} ><i className="bi bi-save" /> Save</button>
+                    <button className="btn btn-danger" onClick={onDelete}><i className="bi bi-trash" /> Delete</button>
                 </div>
             </div>
         </ListViewComponent>

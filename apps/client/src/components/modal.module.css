@@ -1,0 +1,11 @@
+.fade {
+    transition-property: display;
+    transition-duration: 0.5s;
+    transition-behavior: allow-discrete;
+}
+
+.show {
+    display: block !important;
+    backdrop-filter: brightness(0.5) !important;
+    /* position: static !important; */
+}
