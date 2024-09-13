@@ -1,13 +1,11 @@
-import { EventEmitter } from "node:events"
-
-import { Repository } from "typeorm"
 import { z } from "zod"
 import { Logger } from "pino"
+import { Repository } from "typeorm"
 
 import { ClientIpUpdatedEvent } from "@packages/events/ddns-gateway.events"
 import { DdnsGatewayEvent } from "@packages/events/ddns-gateway.events"
-import { Client } from "@server/domains/ddns-gateway/models/Client"
-import { Event } from "@server/domains/ddns-gateway/models/Event"
+import { Client } from "@server/domains/ddns-gateway/entities/Client"
+import { Event } from "@server/domains/ddns-gateway/entities/Event"
 import { AppError } from "../../_errors/AppError"
 import { EventBusService } from "../service-interfaces"
 import { persistDomainEvent } from "../helpers/event-persistence"
@@ -45,7 +43,11 @@ export function makeUpdateClientIpExecutor(
 
 
 
-                const client = await tm.findOne(Client, { where: { id: payload.clientId } })
+                const client = await tm.findOne(Client, {
+                    where: { id: payload.clientId },
+                    relations: { user: true }
+                    
+                })
 
                 if (!client) {
                     throw new AppError(404, "fatal", "client not found")
@@ -94,6 +96,7 @@ export function makeUpdateClientIpExecutor(
                     name: "client-ip-updated",
                     cid,
                     data: {
+                        userId: client.user.id,
                         clientId: client.id,
                         ips: payload.ips
                     }

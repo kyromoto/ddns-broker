@@ -2,7 +2,7 @@ import { EntityManager } from "typeorm"
 
 import { DdnsGatewayEvent } from "@packages/events/ddns-gateway.events"
 import { AppError } from "../../_errors/AppError"
-import { Event } from "../models/Event"
+import { Event } from "../entities/Event"
 
 
 export async function persistDomainEvent(db: EntityManager, event: DdnsGatewayEvent) {

@@ -11,6 +11,16 @@
             "preLaunchTask": "npm: build:server",
             "program": "${workspaceFolder}/dist/server/index.js",
             "outputCapture": "std" 
+        },
+        {
+            "name": "Client",
+            "request": "launch",
+            "type": "chrome",
+            "url": "http://localhost:8000",
+            "webRoot": "${workspaceFolder}/dist/client",
+            "trace": true,
+            "smartStep": true,
+            "sourceMaps": true,
         }
     ]
 }

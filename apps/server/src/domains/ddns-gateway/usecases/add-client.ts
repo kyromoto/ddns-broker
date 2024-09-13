@@ -2,13 +2,13 @@ import { z } from "zod"
 import { Logger } from "pino"
 import { Repository } from "typeorm"
 
-import { DdnsGatewayEvent } from "@packages/events/ddns-gateway"
-import { Password } from "@server/domains/ddns-gateway/models/Password"
-import { Client } from "@server/domains/ddns-gateway/models/Client"
-import { User } from "@server/domains/ddns-gateway/models/User"
+import { DdnsGatewayEvent } from "@packages/events/ddns-gateway.events"
+import { Password } from "@server/domains/ddns-gateway/entities/Password"
+import { Client } from "@server/domains/ddns-gateway/entities/Client"
+import { User } from "@server/domains/ddns-gateway/entities/User"
 
 import * as Regex from "../regexes"
-import { generatePasswordHashAndSalt } from "../utils"
+import { generatePasswordHashAndSalt } from "../utils/password-util"
 import { persistDomainEvent } from "../helpers/event-persistence"
 import { EventBusService } from "../service-interfaces"
 import { AppError } from "../../_errors/AppError"
@@ -79,7 +79,7 @@ export function makeAddClientCommand(
 
 
             await persistDomainEvent(tm, event)
-            await eventBusService.publish(event)
+            await eventBusService.publish(event, cid)
 
             logger.info(event)
 

@@ -1,18 +1,23 @@
 import { Writable } from "node:stream"
 import crypto from "node:crypto"
 
+import { Repository } from "typeorm"
 import pino from "pino"
 
-import { cleanupDatabase, initDatabase } from "@server/test-utils/utils"
-
+import { UserAddedEvent } from "@packages/events/ddns-gateway.events"
+import { cleanupDatabase, initDatabase } from "@server/_test/utils"
+import { makeEventBusService } from "@server/event-bus"
 import { AppDataSource } from "@server/database"
-import { Password } from "@server/domains/ddns-gateway/models/Password"
-import { Event } from "@server/domain/models/Event"
-import { User } from "@server/domains/ddns-gateway/models/User"
+import { Password } from "@server/domains/ddns-gateway/entities/Password"
+import { Event } from "@server/domains/ddns-gateway/entities/Event"
+import { User } from "@server/domains/ddns-gateway/entities/User"
 
-import { UserAddedEvent } from "../../../../../../packages/events/ddns-gateway/user-added-event"
-import { AddUserCommandPayload, makeAddUserCommand as makeAddUserUC } from "./add-user"
-import { Repository } from "typeorm"
+import { AddUserCommandPayload, makeAddUserCommand } from "./add-user"
+
+import { EventBusService } from "../service-interfaces"
+
+
+
 
 
 
@@ -24,6 +29,7 @@ describe("exec add-user-command", () => {
     let userRepository: Repository<User>
     let passwordRepository: Repository<Password>
     let eventRepository: Repository<Event>
+    let eventBusService: EventBusService
 
     const addUserPayload: AddUserCommandPayload = {
         username: "testuser",
@@ -33,7 +39,7 @@ describe("exec add-user-command", () => {
         lastName: "test",
     }
 
-    let cmd: ReturnType<typeof makeAddUserUC>
+    let cmd: ReturnType<typeof makeAddUserCommand>
 
 
     beforeAll(async () => {
@@ -43,8 +49,9 @@ describe("exec add-user-command", () => {
         userRepository = AppDataSource.getRepository(User)
         passwordRepository = AppDataSource.getRepository(Password)
         eventRepository = AppDataSource.getRepository(Event)
+        eventBusService = makeEventBusService(logger)
 
-        cmd = makeAddUserUC(logger, userRepository, passwordRepository)
+        cmd = makeAddUserCommand(logger, userRepository, passwordRepository, eventBusService)
     })
 
     afterAll(async () => {

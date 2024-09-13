@@ -15,8 +15,8 @@ export const ClientAddedEvent = z.object({
     name: z.literal("client-added"),
     cid: z.string().uuid(),
     data: z.object({
-        clientId: z.string().uuid(),
-        userId: z.string().uuid()
+        userId: z.string().uuid(),
+        clientId: z.string().uuid()
     })
 })
 
@@ -25,6 +25,7 @@ export const ClientIpUpdatedEvent = z.object({
     name: z.literal("client-ip-updated"),
     cid: z.string().uuid(),
     data: z.object({
+        userId: z.string().uuid(),
         clientId: z.string().uuid(),
         ips: z.array(z.string().ip())
     })

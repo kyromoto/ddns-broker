@@ -2,10 +2,10 @@ import 'reflect-metadata'
 
 import { DataSource, EntitySchema } from "typeorm"
 
-import { Event } from "../domains/ddns-gateway/models/Event"
-import { User } from "../domains/ddns-gateway/models/User"
-import { Password } from "../domains/ddns-gateway/models/Password"
-import { Client } from "../domains/ddns-gateway/models/Client"
+import { Event } from "../domains/ddns-gateway/entities/Event"
+import { User } from "../domains/ddns-gateway/entities/User"
+import { Password } from "../domains/ddns-gateway/entities/Password"
+import { Client } from "../domains/ddns-gateway/entities/Client"
 import * as env from "@server/env"
 
 

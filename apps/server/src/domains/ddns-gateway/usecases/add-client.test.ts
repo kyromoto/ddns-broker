@@ -2,18 +2,25 @@ import crypto from "node:crypto"
 import { Writable } from "node:stream"
 
 import pino from "pino"
+import { Repository } from "typeorm"
 
 import { cleanupDatabase, initDatabase } from "@server/_test/utils"
+import { ClientAddedEvent } from "@packages/events/ddns-gateway.events"
 
 import { AppDataSource } from "@server/database"
-import { Password } from "@server/domains/ddns-gateway/models/Password"
-import { Client } from "@server/domains/ddns-gateway/models/Client"
-import { User } from "@server/domains/ddns-gateway/models/User"
+import { Password } from "@server/domains/ddns-gateway/entities/Password"
+import { Client } from "@server/domains/ddns-gateway/entities/Client"
+import { Event } from "@server/domains/ddns-gateway/entities/Event"
+import { User } from "@server/domains/ddns-gateway/entities/User"
 
-import { generatePasswordHashAndSalt } from "../utils"
+
+import { EventBusService } from "../service-interfaces"
+import { generatePasswordHashAndSalt } from "../utils/password-util"
 import { AddClientCommandPayload, makeAddClientCommand } from "./add-client"
-import { ClientAddedEvent } from "../../../../../../packages/events/ddns-gateway/client-added-event"
-import { Repository } from "typeorm"
+import { makeEventBusService } from "@server/event-bus"
+
+
+
 
 
 describe("exec add-client-command", () => {
@@ -27,6 +34,7 @@ describe("exec add-client-command", () => {
     let userRepository: Repository<User>
     let passwordRepository: Repository<Password>
     let eventRepository: Repository<Event>
+    let eventBusService: EventBusService
 
     let user: User
     let addClientPayload: AddClientCommandPayload
@@ -42,6 +50,7 @@ describe("exec add-client-command", () => {
         userRepository = AppDataSource.getRepository(User)
         passwordRepository = AppDataSource.getRepository(Password)
         eventRepository = AppDataSource.getRepository(Event)
+        eventBusService = makeEventBusService(logger)
     
         user = userRepository.create({
             id: crypto.randomUUID(),
@@ -58,7 +67,7 @@ describe("exec add-client-command", () => {
             userId: user.id
         }
 
-        cmd = makeAddClientCommand(logger, clientRepository, passwordRepository)
+        cmd = makeAddClientCommand(logger, clientRepository, passwordRepository, eventBusService)
 
         await userRepository.save(user)
 

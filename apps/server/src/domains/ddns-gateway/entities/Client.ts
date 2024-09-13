@@ -1,7 +1,7 @@
 import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { User } from "./User";
 import { Password as Password } from "./Password"
-import { generateHash } from "../utils";
+import { generateHash } from "../utils/password-util";
 
 
 @Entity()

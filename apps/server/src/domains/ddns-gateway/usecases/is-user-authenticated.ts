@@ -1,7 +1,7 @@
 import { Logger } from "pino"
 import { Repository } from "typeorm"
 
-import { User } from "../models/User"
+import { User } from "../entities/User"
 
 
 

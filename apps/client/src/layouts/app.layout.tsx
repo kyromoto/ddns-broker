@@ -1,20 +1,31 @@
 import React from "react"
-import { Link } from "react-router-dom";
+import { Navigate, NavLink, useNavigate } from "react-router-dom";
 import { Outlet } from "react-router-dom";
 
-import { routerConfig } from "../router.config";
+import { useAuth } from "@client/contexts/auth.context";
 
 import styles from "./app.module.css"
 
 
-
 export default function AppLayout () {
+
+    const auth = useAuth()
+
+    if (!auth.isAuthorized(["user"])) {
+        return <Navigate to="/login" />
+    }
+
+    const links = [
+        { name: "Dashboard",    link: "/dashboard" },
+        { name: "Clients",      link: "/clients" },
+        { name: "Jobs",         link: "/jobs" },
+    ]
 
     return (
         <>
             <div className={styles.layout}>
 
-                <header className={styles.header}>
+                <header className={`${styles.header}`}>
 
                     <div className={styles.headerLeft}>
                         <div className={styles.brand}>
@@ -24,29 +35,30 @@ export default function AppLayout () {
                     </div>
 
                     <div className={styles.headerCenter}>
-                        <ul className={styles.menu}>
-                            <li className={styles.item}>
-                                <Link to="/">
-                                    Dashboard
-                                </Link>
-                            </li>
-                            <li className={styles.item}>
-                                <Link to="/profile">
-                                    Profile
-                                </Link>
-                            </li>
-                            <li className={styles.item}>
-                                <Link to="/clients">
-                                    Clients
-                                </Link>
-                            </li>
+                        <ul className="nav nav-underline">
+                            {
+                                links.map(link =>
+                                    <li key={link.name} className="nav-item">
+                                        <NavLink to={link.link} className="nav-link">
+                                            {link.name}
+                                        </NavLink>
+                                    </li>
+                                )
+                            }
                         </ul>
                     </div>
 
                     <div className={styles.headerRight}>
-                        <button className="btn">
+                        
+                        {
+                            auth.hasRoles(["admin"])
+                            && <NavLink to="/admin">Admin</NavLink>
+                        }
+
+                        <button className="btn" onClick={auth.logout}>
                             Logout
                         </button>
+                        
                     </div>
 
                 </header>

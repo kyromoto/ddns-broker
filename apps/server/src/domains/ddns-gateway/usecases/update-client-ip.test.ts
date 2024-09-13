@@ -1,20 +1,22 @@
 import { Writable } from "node:stream"
-import crypto from "node:crypto"
 
+import { Repository } from "typeorm"
+import crypto from "node:crypto"
 import pino from "pino"
 
 import { initDatabase, cleanupDatabase } from "@server/_test/utils"
-
+import { makeEventBusService } from "@server/event-bus"
 import { AppDataSource } from "@server/database"
-import { Client } from "@server/domains/ddns-gateway/models/Client"
-import { Event } from "@server/domains/ddns-gateway/models/Event"
-import { User } from "@server/domains/ddns-gateway/models/User"
+import { Password } from "@server/domains/ddns-gateway/entities/Password"
+import { Client } from "@server/domains/ddns-gateway/entities/Client"
+import { Event } from "@server/domains/ddns-gateway/entities/Event"
+import { User } from "@server/domains/ddns-gateway/entities/User"
 
+import { EventBusService } from "../service-interfaces"
+import { generatePasswordHashAndSalt } from "../utils/password-util"
 import { makeUpdateClientIpExecutor, UpdateClientIpCommandPayload } from "./update-client-ip"
-import { AddClientCommandPayload } from "./add-client"
-import { generatePasswordHashAndSalt } from "../utils"
-import { Password } from "@server/domains/ddns-gateway/models/Password"
-import { Repository } from "typeorm"
+
+
 
 
 describe ("exec update-client-ip-command", () => {
@@ -30,6 +32,7 @@ describe ("exec update-client-ip-command", () => {
     let userRepository: Repository<User>
     let passwordRepository: Repository<Password>
     let eventRepository: Repository<Event>
+    let eventBusService: EventBusService
 
     let user: User
     let client: Client
@@ -49,6 +52,7 @@ describe ("exec update-client-ip-command", () => {
         clientRepository = AppDataSource.getRepository(Client)
         eventRepository = AppDataSource.getRepository(Event)
         passwordRepository = AppDataSource.getRepository(Password)
+        eventBusService = makeEventBusService(logger)
 
         userPassword = passwordRepository.create({...userHash})
         clientPassword = passwordRepository.create({...clientHash})
@@ -74,7 +78,7 @@ describe ("exec update-client-ip-command", () => {
             ips: ["192.168.1.1", "2001:0db8:85a3:0000:0000:8a2e:0370:7334"]
         }
 
-        cmd = makeUpdateClientIpExecutor(logger, clientRepository)
+        cmd = makeUpdateClientIpExecutor(logger, clientRepository, eventBusService)
 
         await userRepository.save(user)
         await clientRepository.save(client)

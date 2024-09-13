@@ -6,6 +6,7 @@ import { routerConfig } from "./router.config"
 
 import "bootstrap/dist/css/bootstrap.min.css"
 import "bootstrap-icons/font/bootstrap-icons.css"
+import { AuthContext, AuthProvider } from "./contexts/auth.context"
 
 
 // development only
@@ -25,6 +26,8 @@ const root = ReactDOM.createRoot(
 
 root.render(
     <React.StrictMode>
-        <RouterProvider router={router} />
+        <AuthProvider>
+            <RouterProvider router={router} />
+        </AuthProvider>
     </React.StrictMode>
 )

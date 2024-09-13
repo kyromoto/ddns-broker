@@ -7,11 +7,11 @@ import pino from "pino"
 import { initDatabase } from "@server/_test/utils"
 import { AppDataSource } from "@server/database"
 
-import { User } from "@server/domains/ddns-gateway/models/User"
-import { Password } from "@server/domains/ddns-gateway/models/Password"
+import { User } from "@server/domains/ddns-gateway/entities/User"
+import { Password } from "@server/domains/ddns-gateway/entities/Password"
 
 import { makeIsUserAuthenticatedQuery } from "./is-user-authenticated"
-import { generatePasswordHashAndSalt } from "../utils"
+import { generatePasswordHashAndSalt } from "../utils/password-util"
 
 
 

@@ -6,20 +6,23 @@ import cors from "cors"
 import pinoHttp from "pino-http"
 import pinoPretty from "pino-pretty"
 import promBundle from "express-prom-bundle"
+import { Logger } from "pino"
 
 import * as env from "@server/env"
 
 import { makeErrorHandler } from "./error"
 import { loggerOptionsHttp } from "@server/logger"
 
-import { Client } from "@server/domains/ddns-gateway/models/Client"
+import { Client } from "@server/domains/ddns-gateway/entities/Client"
+
 
 
 
 declare global {
     namespace Express {
         export interface Request {
-            client: Client | null
+            userId: string | null
+            clientId: string | null
         }
     }
 }
@@ -36,13 +39,18 @@ const promBundleOpts: promBundle.Opts = {
 }
 
 
-export function makeApiServer(apiRouter: Router) {
+const corsConfig: cors.CorsOptions = {
+    origin: "*",
+}
+
+
+export function makeApiServer(logger: Logger, apiRouter: Router) {
 
     const api = express()
     const server = http.createServer(api)
 
-    env.NODE_ENV === "production" && api.use(helmet())
-    env.NODE_ENV === "production" && api.use(cors())
+    api.use(helmet())
+    api.use(cors(corsConfig))
 
     api.use(express.json())
     api.use(pinoHttp(loggerOptionsHttp, pinoPretty({ colorize: true })))
@@ -51,6 +59,9 @@ export function makeApiServer(apiRouter: Router) {
     api.use(apiRouter)
 
     api.use(makeErrorHandler())
+
+
+    logger.info(corsConfig, "cors config")
 
 
     return server

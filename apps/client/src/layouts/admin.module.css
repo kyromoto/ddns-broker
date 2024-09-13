@@ -1,0 +1,24 @@
+.layout {
+
+    display: grid;
+
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+        "nav"
+        "view";
+    
+    gap: 3rem;
+
+
+    .nav {
+        grid-area: nav;
+
+        backdrop-filter: brightness(1.25);
+    }
+
+
+    .view {
+        grid-area: view;
+    }
+}

@@ -1,7 +1,7 @@
 import { Repository } from "typeorm"
 import { Logger } from "pino"
 
-import { Client } from "../models/Client"
+import { Client } from "../entities/Client"
 
 
 

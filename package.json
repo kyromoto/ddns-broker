@@ -18,6 +18,7 @@
     "packages/executors/inwx-dns"
   ],
   "dependencies": {
+    "jose": "^5.9.0",
     "zod": "^3.23"
   },
   "devDependencies": {
