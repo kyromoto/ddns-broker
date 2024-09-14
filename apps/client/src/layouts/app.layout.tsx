@@ -25,7 +25,7 @@ export default function AppLayout () {
         <>
             <div className={styles.layout}>
 
-                <header className={`${styles.header}`}>
+                <header className={`${styles.header} shadow-sm`}>
 
                     <div className={styles.headerLeft}>
                         <div className={styles.brand}>

@@ -4,7 +4,7 @@ type ModalContent = {
     title?: string,
     body: string | JSX.Element,
     confirmLabel: string,
-    level: "info" | "warning" | "danger"
+    level?: "primary" | "warning" | "danger"
     onAction: (confirmed: boolean) => void }
 
 

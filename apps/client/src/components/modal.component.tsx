@@ -23,16 +23,16 @@ export default function ModalComponent () {
     }
 
 
-    function getBgByLevel (level?: "info" | "warning" | "danger") {
+    function getBgByLevel (level?: "primary" | "warning" | "danger") {
         switch (level) {
-            case "info":
+            case "primary":
                 return "bg-primary"
             case "warning":
                 return "bg-warning"
             case "danger":
                 return "bg-danger"
             default:
-                return "bg-primary"
+                return "bg-secondary"
         }
     }
 
