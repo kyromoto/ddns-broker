@@ -68,7 +68,7 @@ export default function AdminUserView () {
 
     return (
         <ListViewComponent
-            name="Users"
+            // name="Users"
             list={mockList.map(user => ({ ...user, display: user.username }))}
             selectedItem={selectedUser && { ...selectedUser, display: selectedUser.username }}
             onItemClicked={user => {
@@ -109,7 +109,7 @@ export default function AdminUserView () {
                     <div>
                         <label>Roles</label>
                         <div className="card">
-                            <div className="card-body d-flex gap-3">
+                            <div className="card-body d-flex gap-3 p-2">
                                 {
                                     roleOptions.map(role => (
                                         <>
@@ -137,7 +137,7 @@ export default function AdminUserView () {
                     <div>
                     <label>Activated</label>
                         <div className="card">
-                            <div className="card-body d-flex gap-3">
+                            <div className="card-body d-flex gap-3 p-2">
                                 <>
                                     <input
                                         type="checkbox"

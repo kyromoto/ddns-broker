@@ -16,9 +16,9 @@ export default function AppLayout () {
     }
 
     const links = [
-        { name: "Dashboard",    link: "/dashboard" },
-        { name: "Clients",      link: "/clients" },
-        { name: "Jobs",         link: "/jobs" },
+        { name: "Dashboard",    link: "/dashboard", icon: "speedometer" },
+        { name: "Clients",      link: "/clients",   icon: "pc" },
+        { name: "Jobs",         link: "/jobs",      icon: "list-task" },
     ]
 
     return (
@@ -35,12 +35,12 @@ export default function AppLayout () {
                     </div>
 
                     <div className={styles.headerCenter}>
-                        <ul className="nav nav-underline">
+                        <ul className="nav nav-underline d-flex gap-4">
                             {
                                 links.map(link =>
                                     <li key={link.name} className="nav-item">
                                         <NavLink to={link.link} className="nav-link">
-                                            {link.name}
+                                            <i className={`bi bi-${link.icon}`} /> {link.name}
                                         </NavLink>
                                     </li>
                                 )
@@ -49,15 +49,30 @@ export default function AppLayout () {
                     </div>
 
                     <div className={styles.headerRight}>
-                        
-                        {
-                            auth.hasRoles(["admin"])
-                            && <NavLink to="/admin">Admin</NavLink>
-                        }
 
-                        <button className="btn" onClick={auth.logout}>
-                            Logout
-                        </button>
+                        <ul className="nav nav-underline d-flex gap-4">
+
+                            {
+                                auth.hasRoles(["admin"]) &&
+                                <li className="nav-item">
+                                    <NavLink to="/admin" className="nav-link">
+                                        <i className="bi bi-building"></i> Admin
+                                    </NavLink>
+                                </li>
+                            }
+
+                            <li className="nav-item">
+                                <button className="btn btn-outline-secondary" onClick={auth.logout}>
+                                    <i className="bi bi-box-arrow-right"></i> Logout
+                                </button>
+                            </li>
+
+
+                        </ul>
+                        
+
+
+
                         
                     </div>
 

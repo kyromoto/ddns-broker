@@ -38,16 +38,16 @@
             "header-left header-center header-right";
 
         gap: calc(var(--padding) * 2);
-
+/* 
         & > * {
 
             display: flex;
-        }
+        } */
 
         .headerLeft {
             grid-area: header-left;
-            justify-content: center;
-            align-items: center;
+            /* justify-content: center; */
+            /* align-items: center; */
             
         }
     
@@ -57,11 +57,11 @@
     
         .headerRight {
             grid-area: header-right;
-            align-items: center;
+            /* align-items: center; */
 
-            & > a {
+            /* & > a {
                 text-decoration: none;
-            }
+            } */
         }
     }
 

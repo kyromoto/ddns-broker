@@ -43,9 +43,11 @@ export default function ListViewComponent<T extends ListItem> (props: PropsWithC
                         props.name && <div className="list-group-item bg-secondary text-center"><strong>{props.name}</strong></div>
                     }
 
-                    <div className="list-group-item" style={{ display: "flex", gap: "0.5rem" }}>
-                        <input type="text" placeholder="Search" className="form-control" value={search} onChange={e => setSearch(e.target.value)} />
-                        <button className="btn btn-secondary"><i className="bi bi-x-lg" onClick={() => setSearch("")} /></button>
+                    <div className="list-group-item p-2" style={{ display: "flex", gap: "0.5rem" }}>
+                        <div className="input-group">
+                            <input type="text" placeholder="Search" className="form-control" value={search} onChange={e => setSearch(e.target.value)} />
+                            <button className="btn btn-outline-secondary"><i className="bi bi-x-lg" onClick={() => setSearch("")} /></button>
+                        </div>
                     </div>
 
                     
