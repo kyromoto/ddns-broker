@@ -32,8 +32,8 @@ import { makeAddClientCommand } from './domains/ddns-gateway/usecases/add-client
 import { makeUpdateClientIpExecutor } from './domains/ddns-gateway/usecases/update-client-ip'
 import { makeIsClientAuthenticatedQuery } from './domains/ddns-gateway/usecases/is-client-authenticated'
 
-import { makeProcessProcessorJobUC } from './domains/ip-update-processor/usecases/process-processor-job'
-import { makeCreateProcessJobUpdateUC } from './domains/ip-update-processor/usecases/create-processor-job'
+import { makeProcessProcessorJobUC } from './domains/dynip-update-processing/usecases/process-processor-job'
+import { makeCreateProcessJobUpdateUC } from './domains/dynip-update-processing/usecases/create-processor-job'
 
 import { makeGetUsersQuery } from './domains/ddns-gateway/usecases/get-users'
 import { makeGetEventsByUserIdQuery } from './domains/ddns-gateway/usecases/get-events-by-userid'

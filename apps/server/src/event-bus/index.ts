@@ -5,7 +5,7 @@ import { Logger } from "pino"
 import { DdnsGatewayEvent, DdnsGatewayEventMap } from "@packages/events/ddns-gateway.events"
 import { IpUpdateProcessorEvent, IpUpdateProcessorEventMap } from "@packages/events/ip-update-processor.events";
 import { EventBusService as DdnsGwEBS } from "@server/domains/ddns-gateway/service-interfaces"
-import { EventBusService as IpUpdateProcessorEBS } from "@server/domains/ip-update-processor/service-interfaces";
+import { EventBusService as IpUpdateProcessorEBS } from "@server/domains/dynip-update-processing/service-interfaces";
 
 
 

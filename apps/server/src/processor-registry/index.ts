@@ -1,5 +1,5 @@
-import { Job } from "@server/domains/ip-update-processor/models/Job";
-import { ProcessorRegistryService } from "@server/domains/ip-update-processor/service-interfaces";
+import { Job } from "@server/domains/dynip-update-processing/models/Job";
+import { ProcessorRegistryService } from "@server/domains/dynip-update-processing/service-interfaces";
 import EventEmitter from "node:events";
 
 
