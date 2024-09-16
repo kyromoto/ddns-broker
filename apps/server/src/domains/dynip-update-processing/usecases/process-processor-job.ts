@@ -1,6 +1,6 @@
 import { Logger } from "pino";
 import { Job } from "../models/Job.model";
-import { ProcessorRegistryService } from "../service-interfaces";
+import { ProcessorRegistryService } from "../services/processor-registry.service";
 import { EntityManager } from "typeorm";
 import { AppError } from "@server/domains/_errors/AppError";
 

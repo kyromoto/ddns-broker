@@ -14,7 +14,7 @@ import { Event } from "@server/domains/ddns-gateway/entities/Event"
 import { User } from "@server/domains/ddns-gateway/entities/User"
 
 
-import { EventBusService } from "../service-interfaces"
+import { EventBusService } from "../services/event-bus.service"
 import { generatePasswordHashAndSalt } from "../utils/password-util"
 import { AddClientCommandPayload, makeAddClientCommand } from "./add-client"
 import { makeEventBusService } from "@server/event-bus"
@@ -62,7 +62,7 @@ describe("exec add-client-command", () => {
         })
     
         addClientPayload = {
-            clientname: "testclient",
+            name: "testclient",
             password: "password12!",
             userId: user.id
         }
@@ -79,11 +79,11 @@ describe("exec add-client-command", () => {
 
 
     test ("add client with invalid username (too short)", async () => {
-        await expect(cmd(cid, { ...addClientPayload, clientname: "test" })).rejects.toThrow()
+        await expect(cmd(cid, { ...addClientPayload, name: "test" })).rejects.toThrow()
     })
 
     test ("add client with invalid username (invalid characters)", async () => {
-        await expect(cmd(cid, { ...addClientPayload, clientname: "test test" })).rejects.toThrow()
+        await expect(cmd(cid, { ...addClientPayload, name: "test test" })).rejects.toThrow()
     })
 
     test ("add client with invalid password (too short)", async () => {
@@ -105,7 +105,7 @@ describe("exec add-client-command", () => {
     test ("check domain event", async () => {
 
         const client = await clientRepository.findOne({
-            where: { clientname: addClientPayload.clientname },
+            where: { clientname: addClientPayload.name },
             relations: { user: true }
         })
         

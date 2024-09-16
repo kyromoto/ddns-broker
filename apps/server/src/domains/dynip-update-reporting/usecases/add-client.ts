@@ -1,17 +1,17 @@
 import { z } from "zod"
 import { Logger } from "pino"
-import { Repository } from "typeorm"
+import { EntityManager, Repository } from "typeorm"
 
-import { DdnsGatewayEvent } from "@packages/events/ddns-gateway.events"
-import { Password } from "@server/domains/ddns-gateway/entities/Password"
-import { Client } from "@server/domains/ddns-gateway/entities/Client"
-import { User } from "@server/domains/ddns-gateway/entities/User"
+import { Client } from "../models/Client.model"
+import { User } from "../models/User.model"
+import { DynipUpdateReportingEvent } from "@packages/events/dynip-update-reporting.events"
 
 import * as Regex from "../regexes"
 import { generatePasswordHashAndSalt } from "../utils/password-util"
 import { persistDomainEvent } from "../helpers/event-persistence"
-import { EventBusService } from "../service-interfaces"
+import { EventBusService } from "../services/event-bus.service"
 import { AppError } from "../../_errors/AppError"
+
 
 
 
@@ -20,21 +20,20 @@ import { AppError } from "../../_errors/AppError"
 export type AddClientCommandPayload = z.infer<typeof AddClientCommandPayload>
 export const AddClientCommandPayload = z.object({
     userId: z.string().uuid(),
-    clientname: z.string().regex(Regex.Client.clientname, "username do not match requirements"),
+    name: z.string().regex(Regex.Client.name, "name do not match requirements"),
     password: z.string().regex(Regex.Password.password, "password do not match requirements"),
 })
 
 
 export function makeAddClientCommand(
     logger: Logger,
-    clientRepository: Repository<Client>,
-    passwordRepository: Repository<Password>,
+    entityManager: EntityManager,
     eventBusService: EventBusService
 ) {
 
     return async (cid: string, payload: AddClientCommandPayload) : Promise<void> => {
 
-        await clientRepository.manager.transaction(async tm => {
+        await entityManager.transaction(async tm => {
 
 
             const validation = AddClientCommandPayload.safeParse(payload)
@@ -44,7 +43,7 @@ export function makeAddClientCommand(
             }
 
 
-            const existingClient = await tm.findOne(Client, { where: { clientname: payload.clientname } })
+            const existingClient = await tm.findOne(Client, { where: { name: payload.name } })
 
             if (existingClient) {
                 throw new AppError(400, "clientname already exists")
@@ -59,16 +58,16 @@ export function makeAddClientCommand(
 
 
             
-            const { hash, salt } = generatePasswordHashAndSalt(payload.password)
+            const password = generatePasswordHashAndSalt(payload.password)
 
             const client = await tm.save(Client, {
-                clientname: payload.clientname,
-                password: passwordRepository.create({ hash, salt }),
+                clientname: payload.name,
+                password,
                 user
             })
 
 
-            const event: DdnsGatewayEvent = {
+            const event: DynipUpdateReportingEvent = {
                 name: "client-added",
                 cid,
                 data: {

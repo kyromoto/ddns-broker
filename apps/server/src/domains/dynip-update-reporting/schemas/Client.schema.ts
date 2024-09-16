@@ -15,9 +15,6 @@ export const ClientSchema = new EntitySchema<Client>({
         password: {
             type: "simple-json",
         },
-        userId: {
-            type: "text"
-        },
         createAt: {
             type: "text",
             createDate: true
@@ -27,9 +24,15 @@ export const ClientSchema = new EntitySchema<Client>({
             updateDate: true
         }
     },
+    relations: {
+        user: {
+            type: "many-to-one",
+            target: "User"
+        }
+    },
     uniques: [
         {
-            columns: ["name", "userId"]
+            columns: ["name", "user"]
         }
     ]
 })

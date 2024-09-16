@@ -1,10 +1,10 @@
 export namespace User {
-    export const username = /^[A-Za-z0-9_.-]{8,}$/;
+    export const name = /^[A-Za-z0-9_.-]{8,}$/;
 }
 
 
 export namespace Client {
-    export const clientname = /^[A-Za-z0-9_.-]{8,}$/;
+    export const name = /^[A-Za-z0-9_.-]{8,}$/;
 }
 
 export namespace Password {

@@ -1,15 +1,14 @@
-
 import { z } from "zod"
 import { Logger } from "pino"
-import { Repository } from "typeorm"
-
-import { Event } from "../models/Event"
+import { EntityManager } from "typeorm"
 
 import { AppError } from "@server/domains/_errors/AppError"
+import { EventBusService } from "../services/event-bus.service"
 
 export function makeGetEventsByUserIdQuery(
     logger: Logger,
-    eventRepository: Repository<Event>,
+    entityManager: EntityManager,
+    eventBusService: EventBusService
 ) {
 
     return async (userId: string) => {
@@ -20,12 +19,9 @@ export function makeGetEventsByUserIdQuery(
             throw new AppError(400, "invalid user id", validation.error)
         }
 
-        const events = await eventRepository.createQueryBuilder("event")
-            .where("JSON_EXTRACT(event.data, '$.userId') = :userId", { userId: validation.data })
-            .orderBy("event.sequence", "DESC")
-            .getMany()
+        const events = await eventBusService.getAllPublishedEvents()
 
-        return events
+        return events.filter(ev => ev.data.userId === validation.data)
 
     }
 }

@@ -1,9 +1,9 @@
 import { Client } from "./Client.model"
-import { JobStatus } from "../types"
+import { JobStatus } from "./values"
 
 
 
-export type Job = {
+export class Job {
     id: string
     status: JobStatus
     data: {

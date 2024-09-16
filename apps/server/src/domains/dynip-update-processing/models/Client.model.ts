@@ -3,7 +3,7 @@ import { Job } from "./Job.model"
 
 
 
-export type Client = {
+export class Client {
     id: string
     jobs: Job[]
     processors: Processor[]

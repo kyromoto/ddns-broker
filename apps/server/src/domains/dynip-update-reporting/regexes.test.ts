@@ -8,19 +8,19 @@ describe("regexes", () => {
         describe ("username", () => {
 
             test("username to be valid", () => {
-                expect(Regex.User.username.test("User.Name_0-9")).toBeTruthy()
+                expect(Regex.User.name.test("User.Name_0-9")).toBeTruthy()
             })
 
             test("username should be to short", () => {
-                expect(Regex.User.username.test("User")).toBeFalsy()
+                expect(Regex.User.name.test("User")).toBeFalsy()
             })
 
             test("username should not have whitespace", () => {
-                expect(Regex.User.username.test("User Name")).toBeFalsy()
+                expect(Regex.User.name.test("User Name")).toBeFalsy()
             })
 
             test('username should not have "?"', () => {
-                expect(Regex.User.username.test("User?Name")).toBeFalsy()
+                expect(Regex.User.name.test("User?Name")).toBeFalsy()
             })
 
         })
@@ -34,19 +34,19 @@ describe("regexes", () => {
         describe ("clientname", () => {
 
             test("clientname to be valid", () => {
-                expect(Regex.Client.clientname.test("Client.Name_0-9")).toBeTruthy()
+                expect(Regex.Client.name.test("Client.Name_0-9")).toBeTruthy()
             })
 
             test("clientname should be to short", () => {
-                expect(Regex.Client.clientname.test("Client")).toBeFalsy()
+                expect(Regex.Client.name.test("Client")).toBeFalsy()
             })
 
             test("clientname should not have whitespace", () => {
-                expect(Regex.Client.clientname.test("Client Name")).toBeFalsy()
+                expect(Regex.Client.name.test("Client Name")).toBeFalsy()
             })
 
             test('clientname should not have "?"', () => {
-                expect(Regex.Client.clientname.test("Client?Name")).toBeFalsy()
+                expect(Regex.Client.name.test("Client?Name")).toBeFalsy()
             })
 
         })

@@ -4,7 +4,7 @@ import { Client } from "./Client.model"
 
 
 
-export type Processor = {
+export class Processor {
     id: string
     name: string
     version: string

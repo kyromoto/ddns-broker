@@ -8,12 +8,8 @@ import pinoPretty from "pino-pretty"
 import promBundle from "express-prom-bundle"
 import { Logger } from "pino"
 
-import * as env from "@server/env"
-
 import { makeErrorHandler } from "./error"
 import { loggerOptionsHttp } from "@server/logger"
-
-import { Client } from "@server/domains/ddns-gateway/entities/Client"
 
 
 

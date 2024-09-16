@@ -2,7 +2,7 @@ import { z } from "zod"
 import { Logger } from "pino"
 import { Repository } from "typeorm"
 
-import { User } from "../models/User"
+import { User } from "../models/User.model"
 
 import { AppError } from "@server/domains/_errors/AppError"
 

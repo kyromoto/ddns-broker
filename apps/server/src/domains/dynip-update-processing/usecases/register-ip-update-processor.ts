@@ -6,15 +6,16 @@ import { Logger } from "pino"
 
 
 import { Job } from "../models/Job.model"
-import { EventBusService, ProcessorRegistryService } from "../service-interfaces"
+import { EventBusService } from "../services/event-bus.service"
+import { ProcessorRegistryService } from "../services/processor-registry.service"
 import { IpUpdateProcessor, IpUpdateProcessorApi, IpUpdateProcessorLogger, IpUpdateProcessorResult } from "../processor-Interfaces"
 import { AppError } from "@server/domains/_errors/AppError"
-import { ProcessorConfig } from "../models/Processor.model"
-import { IpUpdateProcessorEvent } from "@packages/events/ip-update-processor.events"
+import { Processor } from "../models/Processor.model"
+import { DynipUpdateProcessingEvent } from "@packages/events/dynip-update-processing.events"
 import { persistDomainEvent } from "../helpers/event-persistence"
 
 
-const apiFactory = (job: Job, processor: IpUpdateProcessor<any>, processorConfig: ProcessorConfig, logger: IpUpdateProcessorLogger) : IpUpdateProcessorApi<any> => {
+const apiFactory = (job: Job, processorDefinition: IpUpdateProcessor<any>, processorConfig: Processor, logger: IpUpdateProcessorLogger) : IpUpdateProcessorApi<any> => {
     return {
         getCorrelationId: function (): string {
             return job.id
@@ -26,7 +27,7 @@ const apiFactory = (job: Job, processor: IpUpdateProcessor<any>, processorConfig
             return processorConfig.config
         },
         getProcessorSchema: function (): ZodType<any> {
-            return processor.config.schema
+            return processorDefinition.config.schema
         },
         getClientIps: function (): string[] {
             return job.data.ips
@@ -55,7 +56,7 @@ export function makeRegisterIpUpdateProcessorUC(entityManager: EntityManager, ev
 
 
 
-                const processorConfig = await entityManager.findOne(ProcessorConfig, { where: { id: job.data.processor.id } })
+                const processorConfig = await entityManager.findOne(Processor, { where: { id: job.data.processor.id } })
                 
                 if (!processorConfig) {
                     throw new AppError(404, "processor config not found")
@@ -65,7 +66,7 @@ export function makeRegisterIpUpdateProcessorUC(entityManager: EntityManager, ev
 
                 const api = apiFactory(job, processsor, processorConfig, workerLogger)
                 
-                const evRunning: IpUpdateProcessorEvent = {
+                const evRunning: DynipUpdateProcessingEvent = {
                     name: "job-running",
                     cid: job.id,
                     data: {
@@ -89,7 +90,7 @@ export function makeRegisterIpUpdateProcessorUC(entityManager: EntityManager, ev
                 }
 
 
-                let evEnded: IpUpdateProcessorEvent
+                let evEnded: DynipUpdateProcessingEvent
 
 
                 switch (processorResult.status) {

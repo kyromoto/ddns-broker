@@ -1,11 +1,13 @@
-export type Client = {
+import { User } from "./User.model"
+
+export class Client {
     id: string
     name: string
     password: {
         hash: string
         salt: string
     }
-    userId: string,
+    user: User
     createAt: Date
     updateAt: Date
 }

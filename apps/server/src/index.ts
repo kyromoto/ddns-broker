@@ -5,44 +5,35 @@ import pinoPretty from 'pino-pretty'
 import { Router } from "express"
 
 
-import { User } from './domains/ddns-gateway/entities/User'
-import { Event } from './domains/ddns-gateway/entities/Event'
-import { Client } from './domains/ddns-gateway/entities/Client'
-import { Password } from './domains/ddns-gateway/entities/Password'
-
-
-
 import * as env from './env'
 import * as init from './init'
 import * as Logger from "./logger"
-import { AppDataSource } from './database'
+import { AppDataSource, registerSchemas } from './database'
 import { makeApiServer } from './http-api'
 import { makeEventBusService } from './event-bus'
 import { makeProcessorRegistry } from './processor-registry'
 
-import { makeUpdateClientIpCmdController } from './http-api/controllers/ddns-controllers'
-import { makeAddClientCmdController, makeAddUserCmdController, makeLoginUserCommandController } from './http-api/controllers/command-controllers'
-import { makeGetClientsQueryController, makeGetEventsQueryController, makeGetUsersQueryController, makeRefreshTokenQueryController } from './http-api/controllers/query-controllers'
-import { makeAuthenticateClientMiddleware } from './http-api/middlewares/authenticate-client-mw'
+import EventBusSchemas from './event-bus/schemas'
+import IamSchemas from './domains/iam/schemas'
+import DynipUpdateReportingSchemas from './domains/dynip-update-reporting/schemas'
+import DynipUpdateProcessingSchemas from './domains/dynip-update-processing/schemas'
+
+
 
 import { AppError } from './domains/_errors/AppError'
 
-import { makeAddUserCommand } from './domains/ddns-gateway/usecases/add-user'
-import { makeAddClientCommand } from './domains/ddns-gateway/usecases/add-client'
-import { makeUpdateClientIpExecutor } from './domains/ddns-gateway/usecases/update-client-ip'
-import { makeIsClientAuthenticatedQuery } from './domains/ddns-gateway/usecases/is-client-authenticated'
+import { makeGetUsersQuery } from './domains/iam/usecases/get-users'
+import { makeAddUserCommand } from './domains/iam/usecases/add-user'
+import { makeIsUserTokenValidQuery } from './domains/iam/usecases/is-user-token-valid'
+import { makeGetUserAuthTokensQuery } from './domains/iam/usecases/get-user-auth-tokens'
+import { makeIsClientAuthenticatedQuery } from './domains/dynip-update-reporting/usecases/is-client-credentials-valid'
+import { makeIsUserCredentialsValidQuery } from './domains/iam/usecases/is-user-credentials-valid'
 
-import { makeProcessProcessorJobUC } from './domains/dynip-update-processing/usecases/process-processor-job'
-import { makeCreateProcessJobUpdateUC } from './domains/dynip-update-processing/usecases/create-processor-job'
-
-import { makeGetUsersQuery } from './domains/ddns-gateway/usecases/get-users'
-import { makeGetEventsByUserIdQuery } from './domains/ddns-gateway/usecases/get-events-by-userid'
-import { makeGetClientsByUserIdQuery } from './domains/ddns-gateway/usecases/get-clients-by-userid'
-import { makeLoginUserCommand } from './domains/ddns-gateway/usecases/login-user'
-import { makeRefreshUserTokensQuery } from './domains/ddns-gateway/usecases/refresh-user-token'
-import { makeAuthenticateUserMiddleware } from './http-api/middlewares/authenticate-user-mw'
-import { makeGetUserIdFromAccessToken } from './domains/ddns-gateway/usecases/get-userid-from-accesstoken'
-
+import { makeAddUserCmdController } from './http-api/controllers/iam-command.controller'
+import { makeAuthenticateUserByTokenMiddleware } from './http-api/middlewares/authenticate-user-by-token.middleware'
+import { makeAuthenticateUserByCredentialsMiddleware } from './http-api/middlewares/authenticate-user-by-credentials.middleware'
+import { makeAuthenticateClientByCredentialsMiddleware } from './http-api/middlewares/authenticate-client-by-credentials.middleware'
+import { makeGetUserAuthTokenQueryController, makeGetUsersQueryController } from './http-api/controllers/iam-query.controller'
 
 
 
@@ -52,91 +43,82 @@ import { makeGetUserIdFromAccessToken } from './domains/ddns-gateway/usecases/ge
 
     const logger = pino(Logger.loggerOptions, pinoPretty({ colorize: true }))
 
+    registerSchemas([
+        EventBusSchemas.Event,
+
+        IamSchemas.UserSchema,
+        IamSchemas.RoleSchema,
+
+        DynipUpdateReportingSchemas.UserSchema,
+        DynipUpdateReportingSchemas.ClientSchema,
+
+        DynipUpdateProcessingSchemas.ProcessorSchema,
+        DynipUpdateProcessingSchemas.JobSchema
+    ])
+
     !AppDataSource.isInitialized && await AppDataSource.initialize()
 
-    const userRepository        = AppDataSource.getRepository(User)
-    const clientRepository      = AppDataSource.getRepository(Client)
-    const passwordRepository    = AppDataSource.getRepository(Password)
-    const eventRepository       = AppDataSource.getRepository(Event)
-
-
-    const eventBusService = makeEventBusService(logger)
+    const eventBusService = makeEventBusService(logger, AppDataSource.manager)
     const processorRegistry = makeProcessorRegistry()
 
     // commands
-    const addUserUC                 = makeAddUserCommand(logger, userRepository, passwordRepository, eventBusService)
-    const addClientUC               = makeAddClientCommand(logger, clientRepository, passwordRepository, eventBusService)
-    const updateClientIpUC          = makeUpdateClientIpExecutor(logger, clientRepository, eventBusService)
-    const isClientAuthenticatedUC   = makeIsClientAuthenticatedQuery(logger, clientRepository)
-
-    const loginUserCmd             = makeLoginUserCommand(logger, userRepository, { access: env.ACCESS_TOKEN_SECRET, refresh: env.REFRESH_TOKEN_SECRET })
-    const createProcessorJobUC     = makeCreateProcessJobUpdateUC(AppDataSource.manager, eventBusService, logger)
-    const processProcessorJobUC    = makeProcessProcessorJobUC(AppDataSource.manager, processorRegistry, logger)
+    const addUserCommand = makeAddUserCommand(logger, AppDataSource.manager, eventBusService)
 
 
     // queries
-    const getUsersQuery             = makeGetUsersQuery(logger, userRepository)
-    const getClientsByUserIdQuery   = makeGetClientsByUserIdQuery(logger, userRepository)
-    const getEventsByUserIdQuery    = makeGetEventsByUserIdQuery(logger, eventRepository)
-    const getUserIdFromAccessToken  = makeGetUserIdFromAccessToken(env.ACCESS_TOKEN_SECRET)
-    const refreshUserTokensQuery    = makeRefreshUserTokensQuery(logger, userRepository, { access: env.ACCESS_TOKEN_SECRET, refresh: env.REFRESH_TOKEN_SECRET })
+    const isClientAuthenticatedQuery    = makeIsClientAuthenticatedQuery    (logger, AppDataSource.manager)
+    const isUserCredentialsValidQuery   = makeIsUserCredentialsValidQuery   (logger, AppDataSource.manager)
+    const isUserTokenValidQuery         = makeIsUserTokenValidQuery         (logger, AppDataSource.manager, { access: env.ACCESS_TOKEN_SECRET, refresh: env.REFRESH_TOKEN_SECRET })
+    const getUserAuthTokensQuery        = makeGetUserAuthTokensQuery        (logger, AppDataSource.manager, { access: env.ACCESS_TOKEN_SECRET, refresh: env.REFRESH_TOKEN_SECRET })
+    const getUsersQuery                 = makeGetUsersQuery                 (logger, AppDataSource.manager)
 
 
     // http middleware
-    const authClientMiddleware  = makeAuthenticateClientMiddleware(isClientAuthenticatedUC, clientRepository)
-    const authUserMiddleware    = makeAuthenticateUserMiddleware(getUserIdFromAccessToken)
+    const authenticateUserByTokenMiddleware         = makeAuthenticateUserByTokenMiddleware         (AppDataSource.manager, isUserTokenValidQuery)
+    const authenticateUserByCredentialsMiddleware   = makeAuthenticateUserByCredentialsMiddleware   (AppDataSource.manager, isUserCredentialsValidQuery)
+    const authenticateClientByCredentialsMiddleware = makeAuthenticateClientByCredentialsMiddleware (AppDataSource.manager, isClientAuthenticatedQuery)
+
+    // eventBusService.subscribe("client-ip-updated", async event => {
+
+    //     if (Array.isArray(event) || event.name !== "client-ip-updated") {
+    //         throw new AppError(500, `event payload do not match subscribed event name client-ip-updated`)
+    //     }
+
+    //     await createProcessorJobUC(event.data.clientId, event.data.ips, event.cid)
+    // })
 
 
-    eventBusService.subscribe("client-ip-updated", async event => {
-
-        if (Array.isArray(event) || event.name !== "client-ip-updated") {
-            throw new AppError(500, `event payload do not match subscribed event name client-ip-updated`)
-        }
-
-        await createProcessorJobUC(event.data.clientId, event.data.ips, event.cid)
-    })
-
-
-    eventBusService.subscribe("job-pending", async event => {
+    // eventBusService.subscribe("job-pending", async event => {
         
-        if (event.name !== "job-pending") {
-            throw new AppError(500, `event payload do not match subscribed event name job-pending`)
-        }
+    //     if (event.name !== "job-pending") {
+    //         throw new AppError(500, `event payload do not match subscribed event name job-pending`)
+    //     }
         
-        await processProcessorJobUC(event.data.jobId, event.cid)
-    })
+    //     await processProcessorJobUC(event.data.jobId, event.cid)
+    // })
 
 
 
 
-    const apiRouter                 = Router()
-    const ddnsGwCommandRouter       = Router()
-    const ddnsGwQueryRouter         = Router()
-    const ddnsGwClientUpdateRouter  = Router()
+    const apiRouter                     = Router()
+    const dynipUpdateReportingRouter    = Router()
+    const dynipUpdateProcessingRouter   = Router()
+    const iamRouter                     = Router()
+
+
+    iamRouter.post("/login",            authenticateUserByCredentialsMiddleware,    makeGetUserAuthTokenQueryController(getUserAuthTokensQuery))
+    iamRouter.post("/command/add-user", authenticateUserByTokenMiddleware,          makeAddUserCmdController(addUserCommand))
+
+    iamRouter.get("/query/get-users",   authenticateUserByTokenMiddleware,          makeGetUsersQueryController(makeGetUsersQuery(logger, AppDataSource.manager)))
+
+
+    apiRouter.use("/api/iam", iamRouter)
+    apiRouter.use("/api/dynip-update-reporting", dynipUpdateReportingRouter)
+    apiRouter.use("/api/dynip-update-processing", dynipUpdateProcessingRouter)
 
 
 
-    ddnsGwCommandRouter.post("/add-user",   authUserMiddleware, makeAddUserCmdController(addUserUC))
-    ddnsGwCommandRouter.post("/add-client", authUserMiddleware, makeAddClientCmdController(addClientUC))
-    ddnsGwCommandRouter.post("/login-user", makeLoginUserCommandController(loginUserCmd))
-
-    // ddnsGwQueryRouter.get("/ping", makePingQueryController())
-    ddnsGwQueryRouter.get("/refresh-user-tokens",   makeRefreshTokenQueryController(refreshUserTokensQuery))
-    ddnsGwQueryRouter.get("/get-users",             authUserMiddleware, makeGetUsersQueryController(getUsersQuery))
-    ddnsGwQueryRouter.get("/get-clients-by-user",   authUserMiddleware, makeGetClientsQueryController(getClientsByUserIdQuery))
-    ddnsGwQueryRouter.get("/get-events-by-user",    authUserMiddleware, makeGetEventsQueryController(getEventsByUserIdQuery))
-
-
-    ddnsGwClientUpdateRouter.post("/update", authClientMiddleware, makeUpdateClientIpCmdController(updateClientIpUC))
-    ddnsGwClientUpdateRouter.get("/update",  authClientMiddleware, makeUpdateClientIpCmdController(updateClientIpUC))
-    
-    
-    apiRouter.use("/api/ddns-gw/cmd",   ddnsGwCommandRouter)
-    apiRouter.use("/api/ddns-gw/query", ddnsGwQueryRouter)
-    apiRouter.use("/ddns-gw/ddns",      ddnsGwClientUpdateRouter)
-
-
-    await init.createRootUser(logger, userRepository)
+    await init.createRootUser(logger, AppDataSource.manager)
 
 
     makeApiServer(logger, apiRouter).listen(env.HTTP_PORT, env.HTTP_BIND, () => logger.info(`api listening on http://${env.HTTP_BIND}:${env.HTTP_PORT}`))

@@ -1,14 +1,17 @@
 import crypto from "node:crypto"
 
-import { Logger } from "pino";
-import { EntityManager, Repository } from "typeorm";
-import { Client } from "../models/Client.model";
-import { Job } from "../models/Job.model";
-import { Event } from "../models/Event";
-import { AppError } from "@server/domains/_errors/AppError";
-import { EventBusService, ProcessorRegistryService } from "../service-interfaces";
-import { IpUpdateProcessorEvent } from "@packages/events/ip-update-processor.events";
-import { persistDomainEvent } from "../helpers/event-persistence";
+import { Logger } from "pino"
+import { EntityManager } from "typeorm"
+
+import { Client } from "../models/Client.model"
+import { Job } from "../models/Job.model"
+
+import { AppError } from "@server/domains/_errors/AppError"
+import { EventBusService } from "../services/event-bus.service"
+import { ProcessorRegistryService } from "../services/processor-registry.service"
+import { DynipUpdateProcessingEvent } from "@packages/events/dynip-update-processing.events"
+import { persistDomainEvent } from "../helpers/event-persistence"
+
 
 
 
@@ -16,7 +19,7 @@ export function makeCreateProcessJobUpdateUC(entityManager: EntityManager, event
 
     return async function (clientId: string, ips: string[], cid: string) {
 
-        const events: IpUpdateProcessorEvent[] = []
+        const events: DynipUpdateProcessingEvent[] = []
         
 
         await entityManager.transaction(async tm => {
@@ -50,22 +53,23 @@ export function makeCreateProcessJobUpdateUC(entityManager: EntityManager, event
                     }       
                 })
 
-                const event: IpUpdateProcessorEvent = {
+                const event: DynipUpdateProcessingEvent = {
                     name: "job-pending",
                     cid: cid,
                     data: {
                         jobId: job.id
                     }
                 }
-                
-                await persistDomainEvent(tm, event)   
 
                 events.push(event)
 
             }
+
+            await eventBusService.publish(events, cid)
+            
         })
 
-        await eventBusService.publish(events)
+        
 
     }
 

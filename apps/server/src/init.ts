@@ -1,13 +1,14 @@
 import crypto from "node:crypto"
 
-import { Repository } from "typeorm";
-import { createUser, User } from "./domains/ddns-gateway/entities/User";
-import { Logger } from "pino";
-import { createPasswordFromStr } from "./domains/ddns-gateway/entities/Password";
+import { Logger } from "pino"
+import { EntityManager } from "typeorm";
 
-export async function createRootUser (logger: Logger, userRepository: Repository<User>) {
+import { createUser, User } from "./domains/iam/models/User.model";
+import * as passwordUtils from "./domains/dynip-update-reporting/utils/password-util";
 
-    const user = await userRepository.findOne({ where: { username: 'root' } })
+export async function createRootUser (logger: Logger, entityManager: EntityManager) {
+
+    const user = await entityManager.findOne(User, { where: { name: 'root' } })
 
     if (user) {
         return 
@@ -15,14 +16,15 @@ export async function createRootUser (logger: Logger, userRepository: Repository
 
     const passwordStr = crypto.randomBytes(32).toString('base64')
 
-    const rootuser = await userRepository.save(createUser({
-        username: 'root',
-        password: createPasswordFromStr(passwordStr),
+    const rootuser = await entityManager.save(User, createUser({
+        name: 'root',
+        password: {
+            ...passwordUtils.generatePasswordHashAndSalt(passwordStr),
+            version: 1
+        },
         email: 'root@localhost',
-        firstName: 'root',
-        lastName: 'root',
     }))
 
-    logger.info(`Created user: ${rootuser.username} - ${passwordStr}`)
+    logger.info(`Created user: ${rootuser.name} - ${passwordStr}`)
 
 }
